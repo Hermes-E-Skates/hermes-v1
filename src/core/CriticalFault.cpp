@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------
 // This software and all related information is the intellectual
-// property of XXXXXXXXXXXXXXXXXXXXXXXXXXX and may not be 
+// property of the Hermes Eskate project group and may not be 
 // distributed, replicated or disclosed without explicit prior 
 // written permission. All Rights Reserved.
 // ---------------------------------------------------------------
@@ -9,7 +9,7 @@
 #include "../../include/core/CriticalFault.h"
 
 
-namespace eskates {
+namespace hermes {
 namespace core {
 
 CriticalFault::CriticalFault(FaultCode_t code, FaultSrc_t source, uint64_t time, std::string const& message)

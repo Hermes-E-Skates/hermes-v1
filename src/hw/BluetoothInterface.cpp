@@ -1,15 +1,16 @@
 // ---------------------------------------------------------------
 // This software and all related information is the intellectual
-// property of XXXXXXXXXXXXXXXXXXXXXXXXXXX and may not be 
+// property of the Hermes Eskate project group and may not be 
 // distributed, replicated or disclosed without explicit prior 
 // written permission. All Rights Reserved.
 // ---------------------------------------------------------------
 
 
 #include "../../include/hw/BluetoothInterface.h"
+#include "../../include/core/DevLog.h"
 
 
-namespace eskates {
+namespace hermes {
 namespace bt {
 
 uint8_t inline findByte(uint8_t target, uint8_t* const bytes, uint8_t len)
@@ -22,13 +23,15 @@ uint8_t inline findByte(uint8_t target, uint8_t* const bytes, uint8_t len)
 
 BluetoothInterface::BluetoothInterface()
 	: BaseApp()
+	, mHeartbeatHandler(this, &BluetoothInterface::handleHeartbeat, HEARTBEAT)
+	, mHeartbeatTimer(this, &BluetoothInterface::onHeartbeatTimerExpire)
 {
 	return;
 }
 
 bool BluetoothInterface::init()
 {
-	Serial3.begin(BAUD_115200);
+	Serial3.begin(BAUD_9600);
 	return true;
 }
 
@@ -89,13 +92,27 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		CmdId_t cmdId = static_cast<CmdId_t>(cmdIdByte);
+		DLOG_DEBUG("New cmd with id=%d", cmdId);
+
 		switch(cmdId) {
+		case HEARTBEAT:
+			cmd = new HeartbeatCmd(buffer, cmdLen);
+			break;
+
+		case GET_ID:
+			cmd = new GetIdCmd(buffer, cmdLen);
+			break;
+
 		case GET_INFO:
 			cmd = new GetInfoCmd(buffer, cmdLen);
 			break;
 
 		case GET_FAULT:
 			cmd = new GetFaultCmd(buffer, cmdLen);
+			break;
+
+		case GET_CHARGER:
+			cmd = new GetChargeStatusCmd(buffer, cmdLen);
 			break;
 
 		case GET_IMU:
@@ -116,12 +133,34 @@ void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 {
 	if (cmd != nullptr && cmd->valid()) {
 		for (auto it : mHandlers) {
+
 			if (it->getCmdId() == cmd->getCmdId()) {
 				BluetoothResponse* resp = it->handleCommand(cmd);
-				Serial3.write(resp->encode(), resp->getSize());
-				delete resp;
+
+				if (resp != nullptr) {
+					Serial3.write(resp->encode(), resp->getSize());
+					delete resp;
+				} else {
+					DLOG_WARNING("Response from handler is null.");
+				}
 			}
 		}
+	}
+}
+
+void BluetoothInterface::onHeartbeatTimerExpire(uint32_t userdata)
+{
+	mConnected = false;
+	DLOG_WARNING("Bluetooth connection lost.");
+}
+
+BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)
+{
+	mConnected = true;
+	if (mHeartbeatTimer.isEnabled()) {
+		mHeartbeatTimer.restart();
+	} else {
+		mHeartbeatTimer.start(HEARTBEAT_INTERVAL, ONESHOT, 0);
 	}
 }
 
@@ -129,6 +168,21 @@ void BluetoothInterface::registerSerialHandler(BaseBluetoothHandler* handler)
 {
 	mHandlers.push_back(handler);
 	return;
+}
+
+bool BluetoothInterface::isConnected(void) const
+{
+	return mConnected;
+}
+
+bool BluetoothInterface::sendATCommand(const std::string& AT) const
+{
+	if (!isConnected()) {
+		Serial3.write(AT.c_str(), AT.size());
+		return true;
+	} else {
+		return false;
+	}
 }
 
 }

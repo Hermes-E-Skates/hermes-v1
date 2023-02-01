@@ -1,12 +1,15 @@
 // ---------------------------------------------------------------
 // This software and all related information is the intellectual
-// property of Queen's University ELEC490 Group 18 and may not be 
+// property of the Hermes Eskate project group and may not be 
 // distributed, replicated or disclosed without explicit prior 
 // written permission. All Rights Reserved.
 // ---------------------------------------------------------------
 
+
 #include "../../include/core/DevLog.h"
 
+
+namespace hermes {
 
 // ---------------------------------------------------------------
 // @Brief: Constructor is empty.
@@ -34,7 +37,7 @@ void DevLog::init()
 // @Param: ... - variable arguments. 
 // @Return: int - returns the status.
 // ---------------------------------------------------------------
-int DevLog::print(const char * fmt, ...)
+int DevLog::print(const char* fmt, ...)
 {
     char buff[256];
     va_list args;
@@ -43,4 +46,6 @@ int DevLog::print(const char * fmt, ...)
     va_end(args);
     Serial.print(buff);
     return return_status;
+}
+
 }
