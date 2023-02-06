@@ -18,13 +18,13 @@ namespace bt {
 
 enum CmdId_t : int8_t {
     UNKNOWN_CMD = -0x01,
-    HEARTBEAT = 0x4A,
-    GET_ID = 0x20,
-    GET_INFO = 0x21,
-    GET_FAULT = 0x22,
-    GET_BATTERY = 0x23,
-    GET_CHARGER = 0x24,
-    GET_IMU = 0x25,
+    HEARTBEAT = 0x20,
+    GET_ID = 0x21,
+    GET_INFO = 0x22,
+    GET_FAULT = 0x23,
+    GET_BATTERY = 0x24,
+    GET_CHARGER = 0x25,
+    GET_IMU = 0x26,
     SET_THROTTLE = 0x40,
     SET_MODE = 0x41,
     SET_MAX_SPEED = 0x42,
@@ -35,12 +35,13 @@ enum CmdId_t : int8_t {
 class BluetoothCommand
 {
 public:
-    BluetoothCommand(CmdId_t id, uint8_t* const data, uint8_t len);
+    BluetoothCommand(CmdId_t id);
     CmdId_t getCmdId(void) const;
     bool valid(void) const;
+    void setValid(bool valid);
+	virtual bool decode(const uint8_t* const bytes, uint8_t len) = 0;
 
 private:
-	virtual bool decodeData(uint8_t* const bytes, uint8_t len) = 0;
 
     bool mValid = false;
     CmdId_t mCmdId = UNKNOWN_CMD;

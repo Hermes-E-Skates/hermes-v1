@@ -11,6 +11,8 @@
 
 namespace hermes {
 
+DevLogLevel_t DevLog::level = DEBUG;
+
 // ---------------------------------------------------------------
 // @Brief: Constructor is empty.
 // @Return: void
@@ -21,12 +23,13 @@ DevLog::DevLog()
 }
 
 // ---------------------------------------------------------------
-// @Brief: initialized the serial port.
+// @Brief: initialized the Serial3 port.
 // @Param: userData - unused.
 // @Return: bool - returns true if function executed ok.
 // ---------------------------------------------------------------
 void DevLog::init()
 {
+    level = DEBUG;
     Serial.begin(BAUD_115200);
 }
 

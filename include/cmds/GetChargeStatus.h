@@ -22,12 +22,14 @@ union ChargeStatus_t
 {
     struct __attribute__((packed))
     {
-        uint8_t STATE : 1;
         uint8_t INPUT_SOURCE_OK : 1;
         uint8_t IN_FAST_CHARGE : 1;
         uint8_t IN_PRE_CHARGE : 1;
-        uint8_t FAULT : 1;
-        uint8_t RSVD : 3;
+        uint8_t INPUT_OVERVOLT : 1;
+        uint8_t INPUT_OVERCURRENT : 1;
+        uint8_t CHARGER_BATTERY_ERR : 1;
+        uint8_t SYS_SHORT : 1;
+        uint8_t RSVD : 1;
     } bit;
     uint8_t byte = 0;
 };
@@ -35,10 +37,10 @@ union ChargeStatus_t
 class GetChargeStatusCmd : public BluetoothCommand
 {
 public:
-    GetChargeStatusCmd(uint8_t* const bytes, uint8_t len);
+    GetChargeStatusCmd(void);
 
 private:
-    virtual bool decodeData(uint8_t* const bytes, uint8_t len) override;
+    virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
 };
 
 
@@ -53,9 +55,9 @@ public:
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
 
-    ChargeStatus_t mChargeStautus;
+    ChargeStatus_t mChargeStatus;
     uint8_t mInputVoltage;
-    uint8_t mChargeCurrent;
+    uint8_t mInputCurrent;
 };
 
 }

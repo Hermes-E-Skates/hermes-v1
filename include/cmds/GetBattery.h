@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------
 
 
-#ifndef GETINFO_H_
-#define GETINFO_H_
+#ifndef GETBATTERY_H_
+#define GETBATTERY_H_
 
 
 #include "../core/CommonDefs.h"
@@ -18,56 +18,53 @@
 namespace hermes {
 namespace bt {
 
-union SysStatus_t
+union BatteryStatus_t
 {
     struct __attribute__((packed))
     {
-        uint8_t FAULT_FLAG : 1;
-        uint8_t RUN_STATE : 3;
-        uint8_t BATTERY_STATE : 2;
+        uint8_t IC_FAULT : 1;
+        uint8_t EXTERNAL_DISABLE : 1;
+        uint8_t UNDERVOLTAGE : 1;
+        uint8_t OVERVOLTAGE : 1;
+        uint8_t SHORTCIRCUIT : 1;
+        uint8_t OVERCURRENT : 1;
         uint8_t RSVD : 2;
     } bit;
     uint8_t byte = 0;
 };
 
-union ConfigInfo_t
-{
-    struct __attribute__((packed))
-    {
-        Control_t control : 2;
-        MaxSpeed_t maxSpeed : 3;
-        MaxAccel_t maxAccel : 3;
-    } bit;
-    uint8_t byte = 0;
-};
 
-
-class GetInfoCmd : public BluetoothCommand
+class GetBatteryCmd : public BluetoothCommand
 {
 public:
-    GetInfoCmd(void);
+    GetBatteryCmd(void);
 
 private:
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
 };
 
 
-class GetInfoResp : public BluetoothResponse
+class GetBatteryResp : public BluetoothResponse
 {
 public:
-    GetInfoResp(bool ack);
-    void setSysStatus(const SysStatus_t status);
-    void setSpeedInfo(uint8_t speed);
-    void setConfigInfo(const ConfigInfo_t config);
+    GetBatteryResp(bool ack);
+    void setBatteryStatus(const BatteryStatus_t current);
+    void setCellVoltage(uint16_t cell1, uint16_t cell2, uint16_t cell3);
+    void setTemp(uint16_t temp);
+    void setCurrent(uint16_t current);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
 
-    SysStatus_t mSysStatus;
-    uint8_t mSpeed;
-    ConfigInfo_t mConfigInfo;
+    BatteryStatus_t mBatteryStatus;
+    uint16_t mCell1;
+    uint16_t mCell2;
+    uint16_t mCell3;
+    uint16_t mTemp;
+    uint16_t mCurrent;
 };
 
 }
 }
-#endif // GETINFO_H_
+
+#endif // GETBATTERY_H_

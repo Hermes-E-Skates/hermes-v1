@@ -12,13 +12,13 @@
 namespace hermes {
 namespace bt {
 
-GetChargeStatusCmd::GetChargeStatusCmd(uint8_t* const bytes, uint8_t len)
-	: BluetoothCommand(GET_INFO, bytes, len)
+GetChargeStatusCmd::GetChargeStatusCmd(void)
+	: BluetoothCommand(GET_INFO)
 {
 	return;
 }
 
-bool GetChargeStatusCmd::decodeData(uint8_t* const bytes, uint8_t len)
+bool GetChargeStatusCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
 	// No data
 	return true;
@@ -32,12 +32,12 @@ GetChargeStatusResp::GetChargeStatusResp(bool ack)
 
 void GetChargeStatusResp::setChargeStatus(ChargeStatus_t status)
 {
-	mChargeStautus = status;
+	mChargeStatus = status;
 }
 
 void GetChargeStatusResp::setChargeCurrent(uint8_t current)
 {
-	mChargeCurrent = current;
+	mInputCurrent = current;
 }
 
 void GetChargeStatusResp::setInputVoltage(uint8_t voltage)
@@ -47,8 +47,8 @@ void GetChargeStatusResp::setInputVoltage(uint8_t voltage)
 
 void GetChargeStatusResp::encodeData(std::vector<uint8_t>& bytes)
 {
-	bytes.push_back(mChargeStautus.byte);
-	bytes.push_back(mChargeCurrent);
+	bytes.push_back(mChargeStatus.byte);
+	bytes.push_back(mInputCurrent);
 	bytes.push_back(mInputVoltage);
 	return;
 }

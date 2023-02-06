@@ -14,7 +14,7 @@
 #include "../core/CriticalFault.h"
 
 
-namespace eskates {
+namespace hermes {
 namespace messages {
 
 class FaultMsg : public Message

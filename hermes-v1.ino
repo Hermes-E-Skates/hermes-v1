@@ -6,34 +6,25 @@
 // ---------------------------------------------------------------
 
 
-#include "../../include/cmds/BluetoothCommand.h"
+#include <Wire.h>
+#include <ArduinoSTL.h>
+#include "include/core/EventLoop.h"
+#include "include/HermesController.h"
 
 
-namespace hermes {
-namespace bt {
+using namespace hermes;
 
+HermesController controller;
 
-BluetoothCommand::BluetoothCommand(CmdId_t id)
-	: mCmdId(id)
-	, mValid(true)
+void setup()
 {
-	return;
-}
+    // Lag the bootup to ensure all IC's are at a stable voltage
+    delay(1000);
+    core::EventLoop::getInstance()->init();
+  }
 
-CmdId_t BluetoothCommand::getCmdId(void) const
+void loop()
 {
-	return mCmdId;
+    core::EventLoop::getInstance()->processEvents();
 }
 
-bool BluetoothCommand::valid(void) const
-{
-	return mValid;
-}
-
-void BluetoothCommand::setValid(bool valid)
-{
-	mValid = valid;
-}
-
-}
-}

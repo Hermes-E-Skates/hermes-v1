@@ -12,13 +12,13 @@
 namespace hermes {
 namespace bt {
 
-HeartbeatCmd::HeartbeatCmd(uint8_t* const bytes, uint8_t len)
-	: BluetoothCommand(HEARTBEAT, bytes, len)
+HeartbeatCmd::HeartbeatCmd(void)
+	: BluetoothCommand(HEARTBEAT)
 {
 	return;
 }
 
-bool HeartbeatCmd::decodeData(uint8_t* const bytes, uint8_t len)
+bool HeartbeatCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
 	return true;
 }

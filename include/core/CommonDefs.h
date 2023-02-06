@@ -11,6 +11,7 @@
 
 
 #include <stdint.h>
+#include <Arduino.h>
 
 
 namespace hermes {
@@ -55,12 +56,40 @@ enum ChargeSpeed_t
     MAX_SPEED = 5000 / 64
 };
 
+enum MaxSpeed_t
+{
+    KMH5 = 0,
+    KMH10 = 1,
+    KMH15 = 2,
+    KMH20 = 3,
+    KMH25 = 4,
+    KMH30 = 5,
+    KMH35 = 6,
+    UNLIMITED = 7
+};
+
+enum MaxAccel_t
+{
+    SLOW = 0,
+    NORMAL = 1,
+    FAST = 2,
+    RACE = 3
+};
+
+enum Control_t
+{
+    LOAD_SENSOR = 0,
+    BLUETOOTH = 1,
+    MOTION = 2,
+    OFF = 3
+};
+
 enum Pin_t : int8_t
 {
     RX_PIN = 0,
     TX_PIN = 1,
     ESC_PWM_PIN = 46,
-    B1_PIN = 51,
+    B1_PIN = 9,
     GPIO_1_PIN = 44,
     GPIO_2_PIN = 43,
     RX_BT_PIN = 14,
@@ -71,19 +100,34 @@ enum Pin_t : int8_t
     USBC_FLIP_PIN = 33,
     USBC_FAULT_PIN = 34,
     I2C_EN_PIN = 30,
-    USBC_INT_PIN = -1,
+    CHG_LED = A1,
+    MOT_EN_LED = A3,
+    USER_LED = A4,
+    MOTOR_SENSE_H1 = A14,
+    MOTOR_SENSE_H2 = A13,
+    MOTOR_SENSE_H3 = A12,
+    MOTOR_SENSE_TPM = A15,
+    MOT_EN = A0
 };
 
-enum DevLogLevel_t
+enum DevLogLevel_t : int8_t
 {
     NONE = 0,
     CRITICAL = 1,
     ERROR = 2,
     WARNING = 3,
-    DEBUG = 4,
+    INFO = 4,
+    DEBUG = 5
 };
 
-typedef enum TimerType_t
+enum Identifier_t : int8_t
+{
+    UNKNOWN_ID = 0,
+    LEFT_SKATE = 0x5A,
+    RIGHT_SKATE = 0x5B,
+};
+
+enum TimerType_t
 {
     ONESHOT,
     PERIODIC

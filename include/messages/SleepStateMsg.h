@@ -6,21 +6,25 @@
 // ---------------------------------------------------------------
 
 
-#include <Wire.h>
-#include <ArduinoSTL.h>
-#include "include/core/EventLoop.h"
-#include "include/EskateController.h"
+#ifndef SLEEPSTATEMSG_H_
+#define SLEEPSTATEMSG_H_
 
-using namespace eskates;
 
-EskateController controller;
+#include "Message.h"
 
-void setup()
+
+namespace hermes {
+namespace messages {
+
+class SleepStateMsg : public Message
 {
-    core::EventLoop::getInstance()->init();
-}
+public:
+	SleepStateMsg(bool sleep);
+	bool isSleepRequested(void) const;
 
-void loop()
-{
-    core::EventLoop::getInstance()->processEvents();
+private:
+	bool mSleep;
+};
 }
+}
+#endif // SLEEPSTATEMSG_H_

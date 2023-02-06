@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------
 
 
-#ifndef HEARTBEAT_H_
-#define HEARTBEAT_H_
+#ifndef SETTHROTTLE_H_
+#define SETTHROTTLE_H_
 
 
 #include "../core/CommonDefs.h"
@@ -18,20 +18,21 @@
 namespace hermes {
 namespace bt {
 
-class HeartbeatCmd : public BluetoothCommand
+class SetThrottleCmd : public BluetoothCommand
 {
 public:
-    HeartbeatCmd(void);
+    SetThrottleCmd(void);
+    float getPercentage(void) const;
 
 private:
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
+    uint8_t mThrottle;
 };
 
-
-class HeartbeatResp : public BluetoothResponse
+class SetThrottleResp : public BluetoothResponse
 {
 public:
-    HeartbeatResp(bool ack);
+    SetThrottleResp(bool ack);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
@@ -39,5 +40,4 @@ private:
 
 }
 }
-
-#endif // HEARTBEAT_H_
+#endif // GETINFO_H_

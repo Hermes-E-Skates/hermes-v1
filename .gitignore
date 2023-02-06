@@ -1,0 +1,11 @@
+# ignore visual studio
+.vs/
+__vm/
+
+bin/
+
+obj/
+
+hermes-v1.sln
+hermes-v1.vcxproj
+hermes-v1.vcxproj.filters

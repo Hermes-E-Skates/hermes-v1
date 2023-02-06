@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------
 
 
-#ifndef HEARTBEAT_H_
-#define HEARTBEAT_H_
+#ifndef SETMAXSPEED_H_
+#define SETMAXSPEED_H_
 
 
 #include "../core/CommonDefs.h"
@@ -18,20 +18,21 @@
 namespace hermes {
 namespace bt {
 
-class HeartbeatCmd : public BluetoothCommand
+class SetMaxSpeedCmd : public BluetoothCommand
 {
 public:
-    HeartbeatCmd(void);
+    SetMaxSpeedCmd(void);
+    MaxSpeed_t getMaxSpeed(void) const;
 
 private:
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
+    MaxSpeed_t mMaxSpeed;
 };
 
-
-class HeartbeatResp : public BluetoothResponse
+class SetMaxSpeedResp : public BluetoothResponse
 {
 public:
-    HeartbeatResp(bool ack);
+    SetMaxSpeedResp(bool ack);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
@@ -39,5 +40,4 @@ private:
 
 }
 }
-
-#endif // HEARTBEAT_H_
+#endif // SETMAXSPEED_H_

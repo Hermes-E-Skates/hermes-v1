@@ -8,6 +8,7 @@
 
 #include "../../include/core/BaseApp.h"
 #include "../../include/core/EventLoop.h"
+#include "Wire.h"
 
 
 namespace hermes {

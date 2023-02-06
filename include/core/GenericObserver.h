@@ -12,6 +12,7 @@
 
 #include "CommonDefs.h"
 #include "Arduino.h"
+#include "DevLog.h"
 
 
 namespace hermes {
@@ -57,6 +58,7 @@ public:
     {
         mEnabled = true;
         mLastState = digitalRead(mPin);
+        DLOG_DEBUG("Enabling observer with initial state %s", mLastState ? "HIGH" : "LOW");
     }
 
     void disable(void) override

@@ -7,6 +7,7 @@
 
 
 #include "../../include/core/CriticalFault.h"
+#include "../../include/core/DevLog.h"
 
 
 namespace hermes {
@@ -16,7 +17,7 @@ CriticalFault::CriticalFault(FaultCode_t code, FaultSrc_t source, uint64_t time,
 	: mFaultCode(code)
 	, mFaultSrc(source)
 	, mTimeOfOccurence(time)
-	, mMessage(message)
+	, mMessage(message.c_str(), message.size())
 {
 	return;
 }
@@ -43,6 +44,12 @@ uint64_t CriticalFault::getTimeOfOccurence(void) const
 
 std::string CriticalFault::getMessage(void) const
 {
+	if (mMessage.empty()) {
+		DLOG_WARNING("Critical fault message is empty.");
+	}
+	else {
+		DLOG_WARNING("%s", mMessage.c_str());
+	}
 	return mMessage;
 }
 

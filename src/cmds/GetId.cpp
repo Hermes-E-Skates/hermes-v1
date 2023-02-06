@@ -12,13 +12,13 @@
 namespace hermes {
 namespace bt {
 
-GetIdCmd::GetIdCmd(uint8_t* const bytes, uint8_t len)
-	: BluetoothCommand(GET_ID, bytes, len)
+GetIdCmd::GetIdCmd(void)
+	: BluetoothCommand(GET_ID)
 {
 	return;
 }
 
-bool GetIdCmd::decodeData(uint8_t* const bytes, uint8_t len)
+bool GetIdCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
 	// No data
 	return true;
@@ -26,11 +26,12 @@ bool GetIdCmd::decodeData(uint8_t* const bytes, uint8_t len)
 
 GetIdResp::GetIdResp(bool ack)
 	: BluetoothResponse(GET_ID, ack)
+	, mIdentifier(UNKNOWN_ID)
 {
 	return;
 }
 
-void GetIdResp::setIdentifier(uint8_t id)
+void GetIdResp::setIdentifier(Identifier_t id)
 {
 	mIdentifier = id;
 }

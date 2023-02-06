@@ -43,12 +43,50 @@ bool I2cInterface::i2cWrite(uint8_t slaveAddr, uint8_t registerAddr, uint8_t* da
     return success;
 }
 
+bool I2cInterface::i2cWrite(uint8_t slaveAddr, uint16_t registerAddr, uint8_t* data, uint8_t len) const
+{
+    bool success = (len > 0) && (data != nullptr);
+    if (success) {
+        Wire.beginTransmission(slaveAddr);
+        Wire.write(registerAddr);
+        Wire.write(data, len);
+    }
+
+    success = (Wire.endTransmission() == 0);
+    return success;
+}
+
 bool I2cInterface::i2cRead(uint8_t slaveAddr, uint8_t registerAddr, uint8_t* data, uint8_t len) const
 {
     bool success = (len > 0) && (data != nullptr);
     if (success) {
         Wire.beginTransmission(slaveAddr);
         Wire.write(registerAddr);
+        success = (Wire.endTransmission(false) == 0);
+
+        if (success) {
+            success = (Wire.requestFrom(slaveAddr, len) == len);
+
+            if (success) {
+                Wire.readBytes(data, len);
+                success = (Wire.endTransmission() == 0);
+            }
+        }
+    }
+
+    return success;
+}
+
+bool I2cInterface::i2cRead(uint8_t slaveAddr, uint16_t registerAddr, uint8_t* data, uint8_t len) const
+{
+    uint8_t low = static_cast<uint8_t>((registerAddr >> 0) & 0x00FF);
+    uint8_t high = static_cast<uint8_t>((registerAddr >> 8) & 0x00FF);
+
+    bool success = (len > 0) && (data != nullptr);
+    if (success) {
+        Wire.beginTransmission(slaveAddr);
+        Wire.write(low);
+        Wire.write(high);
         success = (Wire.endTransmission(false) == 0);
 
         if (success) {
