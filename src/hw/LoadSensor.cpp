@@ -6,6 +6,9 @@
 // ---------------------------------------------------------------
 
 
+#include "../../include/hw/LoadSensor.h"
+
+
 namespace hermes {
 namespace hw {
 

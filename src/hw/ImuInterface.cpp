@@ -6,6 +6,9 @@
 // ---------------------------------------------------------------
 
 
+#include "../../include/hw/ImuInterface.h"
+
+
 namespace hermes {
 namespace hw {
 

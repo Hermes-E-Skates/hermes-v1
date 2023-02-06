@@ -21,10 +21,10 @@ namespace bt {
 class HeartbeatCmd : public BluetoothCommand
 {
 public:
-    HeartbeatCmd(uint8_t* const bytes, uint8_t len);
+    HeartbeatCmd(void);
 
 private:
-    virtual bool decodeData(uint8_t* const bytes, uint8_t len) override;
+    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
 };
 
 

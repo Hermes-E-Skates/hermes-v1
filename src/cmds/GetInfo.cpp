@@ -12,13 +12,13 @@
 namespace hermes {
 namespace bt {
 
-GetInfoCmd::GetInfoCmd(uint8_t* const bytes, uint8_t len)
-	: BluetoothCommand(GET_INFO, bytes, len)
+GetInfoCmd::GetInfoCmd()
+	: BluetoothCommand(GET_INFO)
 {
 	return;
 }
 
-bool GetInfoCmd::decodeData(uint8_t* const bytes, uint8_t len)
+bool GetInfoCmd::decode(uint8_t* const bytes, uint8_t len)
 {
 	// No data
 	return true;
@@ -35,14 +35,9 @@ void GetInfoResp::setSysStatus(SysStatus_t status)
 	mSysStatus = status;
 }
 
-void GetInfoResp::setSpeedInfo(SpeedInfo_t speed)
+void GetInfoResp::setSpeedInfo(uint8_t speed)
 {
-	mSpeedInfo = speed;
-}
-
-void GetInfoResp::setBatteryInfo(BatteryInfo_t battery)
-{
-	mBatteryInfo = battery;
+	mSpeed = speed;
 }
 
 void GetInfoResp::setConfigInfo(ConfigInfo_t config)
@@ -54,8 +49,7 @@ void GetInfoResp::encodeData(std::vector<uint8_t>& bytes)
 {
 	bytes.push_back(mSysStatus.byte);
 	bytes.push_back(mConfigInfo.byte);
-	bytes.push_back(mSpeedInfo.byte);
-	bytes.push_back(mBatteryInfo.byte);
+	bytes.push_back(mSpeed);
 	return;
 }
 

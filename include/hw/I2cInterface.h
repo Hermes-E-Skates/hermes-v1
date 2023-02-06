@@ -5,8 +5,13 @@
 // written permission. All Rights Reserved.
 // ---------------------------------------------------------------
 
+
 #ifndef I2CINTERFACE_H_
 #define I2CINTERFACE_H_
+
+
+#include <Arduino.h>
+#include <Wire.h>
 
 
 namespace hermes {

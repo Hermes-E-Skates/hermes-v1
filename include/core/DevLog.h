@@ -10,6 +10,7 @@
 #define DEVLOG_H_
 
 
+#include <Arduino.h>
 #include <cstring>
 #include "CommonDefs.h"
 
@@ -18,6 +19,7 @@ namespace hermes {
 
 #define __FILENAME__ (std::strrchr(__FILE__, '\\') ? std::strrchr(__FILE__, '\\') + 1 : __FILE__)
 #define DLOG_DEBUG(fmt, ...) if( DevLog::level >= DEBUG )       { DevLog::print(("%s: %d: %s(): " fmt "\r\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 
+#define DLOG_INFO(fmt, ...) if( DevLog::level >= INFO )       { DevLog::print(("%s: %d: %s(): " fmt "\r\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 
 #define DLOG_WARNING(fmt, ...) if( DevLog::level >= WARNING )   { DevLog::print(("%s: %d: %s(): " fmt "\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 
 #define DLOG_ERROR(fmt, ...) if( DevLog::level >= ERROR )       { DevLog::print(("%s: %d: %s(): " fmt "\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 
 #define DLOG_CRITICAL(fmt, ...) if( DevLog::level >= CRITICAL ) { DevLog::print(("%s: %d: %s(): " fmt "\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 

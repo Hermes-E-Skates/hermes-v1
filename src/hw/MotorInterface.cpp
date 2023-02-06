@@ -6,6 +6,9 @@
 // ---------------------------------------------------------------
 
 
+#include "../../include/hw/MotorInterface.h"
+
+
 namespace hermes {
 namespace hw {
 

@@ -6,9 +6,27 @@
 // ---------------------------------------------------------------
 
 
+#ifndef MOTORINTERFACE_H_
+#define MOTORINTERFACE_H_
+
+
+#include "../core/BaseApp.h"
+
+
 namespace hermes {
 namespace hw {
 
+class MotorInterface {
+public:
+
+
+private:
+
+
+};
 
 }
 }
+
+
+#endif // MOTORINTERFACE_H_

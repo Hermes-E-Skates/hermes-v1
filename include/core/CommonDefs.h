@@ -55,6 +55,35 @@ enum ChargeSpeed_t
     MAX_SPEED = 5000 / 64
 };
 
+enum MaxSpeed_t
+{
+    KMH5 = 0,
+    KMH10 = 1,
+    KMH15 = 2,
+    KMH20 = 3,
+    KMH25 = 4,
+    KMH30 = 5,
+    KMH35 = 6,
+    UNLIMITED = 7
+};
+
+enum MaxAccel_t
+{
+    MINISCULE = 0,
+    SLOW = 1,
+    NORMAL = 2,
+    FAST = 3,
+    RACE = 4
+};
+
+enum Control_t
+{
+    LOAD_SENSOR = 0,
+    BLUETOOTH = 1,
+    MOTION = 2,
+    OFF = 3
+};
+
 enum Pin_t : int8_t
 {
     RX_PIN = 0,
@@ -71,19 +100,26 @@ enum Pin_t : int8_t
     USBC_FLIP_PIN = 33,
     USBC_FAULT_PIN = 34,
     I2C_EN_PIN = 30,
-    USBC_INT_PIN = -1,
 };
 
-enum DevLogLevel_t
+enum DevLogLevel_t : int8_t
 {
     NONE = 0,
     CRITICAL = 1,
     ERROR = 2,
     WARNING = 3,
-    DEBUG = 4,
+    INFO = 4,
+    DEBUG = 5
 };
 
-typedef enum TimerType_t
+enum Identifier_t : int8_t
+{
+    UNKNOWN_ID = 0,
+    LEFT_SKATE = 0x5A,
+    RIGHT_SKATE = 0x5B,
+};
+
+enum TimerType_t
 {
     ONESHOT,
     PERIODIC

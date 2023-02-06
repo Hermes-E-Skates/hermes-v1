@@ -6,29 +6,12 @@
 // ---------------------------------------------------------------
 
 
-#include "../../include/cmds/BluetoothCommand.h"
+#include "../../include/hw/UsbController.h"
 
 
 namespace hermes {
-namespace bt {
+namespace hw {
 
-
-BluetoothCommand::BluetoothCommand(CmdId_t id)
-	: mCmdId(id)
-	, mValid(true)
-{
-	return;
-}
-
-CmdId_t BluetoothCommand::getCmdId(void) const
-{
-	return mCmdId;
-}
-
-bool BluetoothCommand::valid(void) const
-{
-	return mValid;
-}
 
 }
 }

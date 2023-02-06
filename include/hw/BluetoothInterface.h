@@ -10,6 +10,7 @@
 #define BLUETOOTHINTERFACE_H_
 
 
+#include <Arduino.h>
 #include <vector>
 #include "../core/BaseApp.h"
 #include "../core/GenericTimer.h"
@@ -33,7 +34,7 @@ public:
 	virtual bool init(void) override;
 	virtual void loop(void) override;
 	virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
-	void registerSerialHandler(BaseBluetoothHandler* handler);
+	bool registerSerialHandler(BaseBluetoothHandler* handler);
 	bool isConnected(void) const;
 	bool sendATCommand(const std::string& AT) const;
 

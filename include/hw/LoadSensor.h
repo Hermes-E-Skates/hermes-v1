@@ -6,9 +6,27 @@
 // ---------------------------------------------------------------
 
 
+#ifndef LOADSENSOR_H_
+#define LOADSENSOR_H_
+
+
+#include "../core/BaseApp.h"
+
+
 namespace hermes {
 namespace hw {
 
+class LoadSensor {
+public:
+
+
+private:
+
+
+};
 
 }
 }
+
+
+#endif // LOADSENSOR_H_

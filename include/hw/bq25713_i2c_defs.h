@@ -10,6 +10,9 @@
 #define	BQ25713_I2C_DEFS_H_
 
 
+#include <Arduino.h>
+
+
 /* 
  * this file contains the i2c definitions for the bq25713 charger 
  * ic. I've only included the registers that I plan on using.
@@ -35,6 +38,8 @@ constexpr uint8_t CHARGE_CURRENT_HIGH = 0x03;
 constexpr uint8_t CHARGE_CURRENT_LOW = 0x02;
 constexpr uint8_t CHARGER_STATUS_HIGH = 0x21;
 constexpr uint8_t CHARGER_STATUS_LOW = 0x20;
+constexpr uint8_t CHARGER_INPUT_VOLTAGE = 0x27;
+constexpr uint8_t CHARGER_INPUT_CURRENT = 0x2B;
 
 union ChargeOption0_high
 {
@@ -134,8 +139,8 @@ union ChargeOption3_high
 		uint8_t RSVD : 3;
 		uint8_t EN_ICO_MODE : 1;
 		uint8_t EN_OTG : 1;
-		uint8_t REbit_VINDPM : 1;
-		uint8_t REbit_REG : 1;
+		uint8_t RESET_VINDPM : 1;
+		uint8_t RESET_REG : 1;
 		uint8_t EN_HIZ : 1;
 	}bit;
 	uint8_t byte;

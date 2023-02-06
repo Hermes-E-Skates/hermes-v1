@@ -31,17 +31,17 @@ union FaultData_t
         uint8_t SOFTWARE_ERR : 1;
         uint8_t CRITICAL_FAULT : 1;
     } bit;
-    uint8_t byte = 0;
+    uint8_t byte = 0; 
 };
 
 
 class GetFaultCmd : public BluetoothCommand
 {
 public:
-    GetFaultCmd(uint8_t* const bytes, uint8_t len);
+    GetFaultCmd(void);
 
 private:
-    virtual bool decodeData(uint8_t* const bytes, uint8_t len) override;
+    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
 
     bool mValid = false;
     CmdId_t mCmdId = UNKNOWN_CMD;
@@ -51,7 +51,7 @@ private:
 class GetFaultResp : public BluetoothResponse
 {
 public:
-    GetFaultResp(bool ack, uint8_t speed, uint8_t);
+    GetFaultResp(bool ack);
     void SetFaultStatus(FaultData_t fault);
 
 private:

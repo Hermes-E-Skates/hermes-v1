@@ -11,6 +11,8 @@
 
 namespace hermes {
 
+DevLogLevel DevLog::level = INFO;
+
 // ---------------------------------------------------------------
 // @Brief: Constructor is empty.
 // @Return: void

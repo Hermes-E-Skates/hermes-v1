@@ -96,23 +96,23 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 
 		switch(cmdId) {
 		case HEARTBEAT:
-			cmd = new HeartbeatCmd(buffer, cmdLen);
+			cmd = new HeartbeatCmd();
 			break;
 
 		case GET_ID:
-			cmd = new GetIdCmd(buffer, cmdLen);
+			cmd = new GetIdCmd();
 			break;
 
 		case GET_INFO:
-			cmd = new GetInfoCmd(buffer, cmdLen);
+			cmd = new GetInfoCmd();
 			break;
 
 		case GET_FAULT:
-			cmd = new GetFaultCmd(buffer, cmdLen);
+			cmd = new GetFaultCmd();
 			break;
 
 		case GET_CHARGER:
-			cmd = new GetChargeStatusCmd(buffer, cmdLen);
+			cmd = new GetChargeStatusCmd();
 			break;
 
 		case GET_IMU:
@@ -164,10 +164,14 @@ BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)
 	}
 }
 
-void BluetoothInterface::registerSerialHandler(BaseBluetoothHandler* handler)
+bool BluetoothInterface::registerSerialHandler(BaseBluetoothHandler* handler)
 {
-	mHandlers.push_back(handler);
-	return;
+	if (handler != nullptr) {
+		mHandlers.push_back(handler);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool BluetoothInterface::isConnected(void) const

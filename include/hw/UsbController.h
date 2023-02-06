@@ -6,29 +6,27 @@
 // ---------------------------------------------------------------
 
 
-#include "../../include/cmds/BluetoothCommand.h"
+#ifndef USBCONTROLLER_H_
+#define USBCONTROLLER_H_
+
+
+#include "../core/BaseApp.h"
 
 
 namespace hermes {
-namespace bt {
+namespace hw {
+
+class UsbController {
+public:
 
 
-BluetoothCommand::BluetoothCommand(CmdId_t id)
-	: mCmdId(id)
-	, mValid(true)
-{
-	return;
-}
+private:
 
-CmdId_t BluetoothCommand::getCmdId(void) const
-{
-	return mCmdId;
-}
 
-bool BluetoothCommand::valid(void) const
-{
-	return mValid;
-}
+};
 
 }
 }
+
+
+#endif // USBCONTROLLER_H_

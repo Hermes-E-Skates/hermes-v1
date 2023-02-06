@@ -21,10 +21,10 @@ namespace bt {
 class GetIdCmd : public BluetoothCommand
 {
 public:
-    GetIdCmd(uint8_t* const bytes, uint8_t len);
+    GetIdCmd(void);
 
 private:
-    virtual bool decodeData(uint8_t* const bytes, uint8_t len) override;
+    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
 };
 
 
@@ -32,11 +32,11 @@ class GetIdResp : public BluetoothResponse
 {
 public:
     GetIdResp(bool ack);
-    void setIdentifier(uint8_t partno);
+    void setIdentifier(Identifier_t partno);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
-    uint8_t mIdentifier;
+    Identifier_t mIdentifier;
 };
 
 }
