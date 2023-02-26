@@ -16,7 +16,10 @@ namespace hw {
 
 ChargerInterface::ChargerInterface()
 	: mWatchdogTimer(this, &ChargerInterface::onWdogTimerExpire)
+<<<<<<< HEAD
 	, mFaultStatusTimer(this, &ChargerInterface::onFaultStatusTimerExpire)
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 	, mChargeSpeed(CURRENT_5A)
 {
 	return;
@@ -36,6 +39,7 @@ void ChargerInterface::loop()
 void ChargerInterface::onCriticalFault(const core::CriticalFault& criticalFault)
 {
 	return;
+<<<<<<< HEAD
 }
 
 bool ChargerInterface::isI2cLinkEstablished(void) const
@@ -48,10 +52,13 @@ bool ChargerInterface::isI2cLinkEstablished(void) const
 		DLOG_WARNING("BQ25713 I2C Link=ERR");
 	}
 	return readSuccessfull;
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 }
 
-bool ChargerInterface::startCharging(void)
+void ChargerInterface::startCharging(void)
 {
+<<<<<<< HEAD
 	bool status = false;
 
 	if (isI2cLinkEstablished())
@@ -85,6 +92,89 @@ void ChargerInterface::stopCharging(void)
 		mCharging = false;
 	}
 	return;
+=======
+	DLOG_INFO("Starting charging.");
+	if (mChargeSpeed > 0 && mChargeSpeed <= MAX_SPEED)
+	{
+		mWatchdogTimer.start(4000, PERIODIC, static_cast<uint32_t>(mChargeSpeed));
+	}
+}
+
+void ChargerInterface::stopCharging(void)
+{
+	if (mWatchdogTimer.isEnabled())
+	{
+		mWatchdogTimer.stop();
+	}
+}
+
+bool ChargerInterface::setChargeSpeed(ChargeSpeed_t chargeSpeed)
+{
+	mChargeSpeed = chargeSpeed;
+	return false;
+}
+
+uint8_t ChargerInterface::getInputCurrent(void) const
+{
+	uint8_t inputCurrent = 0;
+	if (!I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGER_INPUT_CURRENT, &inputCurrent, 1)) {
+		DLOG_WARNING("I2C Error.");
+	}
+}
+
+uint8_t ChargerInterface::getInputVoltage(void) const
+{
+	uint8_t inputVoltage = 0;
+	if (!I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGER_INPUT_VOLTAGE, &inputVoltage, 1)) {
+		DLOG_WARNING("I2C Error.");
+	}
+
+	return inputVoltage;
+}
+
+bt::ChargeStatus_t ChargerInterface::getChargerStatus(void) const
+{
+	bool valid = true;
+	bt::ChargeStatus_t status;
+	ChargerStatus_low chargerStatusLow;
+	ChargerStatus_high chargerStatusHigh;
+	valid &= I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGE_OPTION_3_LOW, &chargerStatusLow.byte, 1);
+	valid &= I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGE_OPTION_3_HIGH, &chargerStatusHigh.byte, 1);
+
+	if (valid) {
+		status.bit.FAULT = chargerStatusLow.bit.FAULT_ACOC
+			| chargerStatusLow.bit.FAULT_ACOV
+			| chargerStatusLow.bit.FAULT_BATOC
+			| chargerStatusLow.bit.FAULT_SYS_SHORT;
+
+		status.bit.IN_FAST_CHARGE = chargerStatusHigh.bit.IN_FCHRG;
+		status.bit.IN_PRE_CHARGE = chargerStatusHigh.bit.IN_PCHRG;
+		status.bit.INPUT_SOURCE_OK = chargerStatusHigh.bit.AC_STAT;
+		status.bit.STATE = 0b00; // TODO FINISH THIS
+
+		if (chargerStatusLow.bit.FAULT_SYS_SHORT == 0x01) {
+			core::CriticalFault cf(core::CHARGER_SHORTCIRCUIT, core::CHARGER, micros(), "Charger short circuit");
+			generateCriticalFault(cf);
+		}
+		if (chargerStatusLow.bit.FAULT_ACOC == 0x01) {
+			core::CriticalFault cf(core::CHARGER_INPUTOVERCURRENT, core::CHARGER, micros(), "Charger short circuit");
+			generateCriticalFault(cf);
+		}
+		if (chargerStatusLow.bit.FAULT_ACOV == 0x01) {
+			core::CriticalFault cf(core::CHARGER_INPUTOVERVOLTAGE, core::CHARGER, micros(), "Charger short circuit");
+			generateCriticalFault(cf);
+		}
+		if (chargerStatusLow.bit.FAULT_BATOC == 0x01) {
+			core::CriticalFault cf(core::CHARGER_BATTERY_ERR, core::CHARGER, micros(), "Wrong battery voltage connected, or battery removed while charging.");
+			generateCriticalFault(cf);
+		}
+	}
+	else {
+		DLOG_WARNING("I2C Error.");
+	}
+
+	return status;
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 }
 
 void ChargerInterface::setChargeSpeed(ChargeSpeed_t chargeSpeed)
@@ -255,12 +345,15 @@ bool ChargerInterface::configureBq25713(void) const
 	charge3high.bit.EN_OTG = 0;
 	charge3high.bit.EN_ICO_MODE = 0;
 	I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_HIGH, &charge3high.byte, 1);
+<<<<<<< HEAD
 }
 
 void ChargerInterface::onFaultStatusTimerExpire(uint32_t chargeSpeed)
 {
 	getChargerStatus(); // this will check the fault bits and print them
 	DLOG_DEBUG("Charger Status: [0x%X]");
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 }
 
 void ChargerInterface::onWdogTimerExpire(uint32_t chargeSpeed)

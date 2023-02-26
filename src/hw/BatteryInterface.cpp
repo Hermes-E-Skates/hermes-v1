@@ -187,6 +187,124 @@ uint16_t BatteryInterface::getTemp(void)
 	return mTemp;
 }
 
+uint8_t BatteryInterface::getPercentEstimateFromVoltage() const
+{
+	/* lookup table is (obviously) not declared on the stack,
+	   it's stored in static memory. Voltage is in voltage x100. 
+	   Note: the voltage may drop under high current conditions.
+	*/
+	static std::map<uint16_t, uint8_t> lipoPercentageLookupTable = {
+		{982, 0},
+		{1083, 5},
+		{1106, 10},
+		{1120, 15},
+		{1118, 20},
+		{1130, 30},
+		{1139, 40},
+		{1151, 50},
+		{1162, 60},
+		{1186, 70},
+		{1207, 80},
+		{1225, 85},
+		{1233, 90},
+		{1245, 95},
+		{1260, 100}
+	};
+
+	uint8_t percentage = 0;
+	uint16_t batteryVoltage = mCell1 + mCell2 + mCell3;
+	auto low = lipoPercentageLookupTable.begin();
+	auto high = lipoPercentageLookupTable.begin();
+	high++;
+
+	while (high != lipoPercentageLookupTable.end()) {
+		uint16_t voltageLow = low->first;
+		uint16_t voltageHigh = high->first;
+		
+		// if the bat voltage is literally the lookup voltage, then assign the percentage
+		if (batteryVoltage == voltageHigh) percentage = high->second;
+		else if (batteryVoltage == voltageLow) percentage = low->second;
+
+		// if the bat voltage is in-between, then lerp the estimated percentage
+		else if (batteryVoltage > voltageLow && batteryVoltage < voltageHigh) { 
+			uint8_t percentLow = low->second;
+			uint8_t percentHigh = high->second;
+			percentage = lerp(voltageLow, voltageHigh, batteryVoltage, percentLow, percentHigh);
+			break;
+
+		// if not in range, move window right
+		} else {
+			low++;
+			high++;
+		}
+	}
+
+	return percentage;
+}
+
+uint8_t BatteryInterface::lerp(uint16_t lowVoltage, uint16_t highVoltage, uint16_t voltage, uint8_t lowPercent, uint8_t highPercent) const
+{
+	return (lowPercent * (highVoltage - voltage) + highPercent * (voltage - lowVoltage)) / (highVoltage - lowVoltage);
+}
+
+bool BatteryInterface::enableDischarge(void)
+{
+	return false;
+}
+
+bool BatteryInterface::enableCharge(void)
+{
+	return false;
+}
+
+bool BatteryInterface::clearFault(void)
+{
+
+	return false;
+}
+
+bt::BatteryStatus_t BatteryInterface::getBatteryStatus(void)
+{
+	bt::BatteryStatus_t batteryStatus;
+	batteryStatus.bit.OVERCURRENT = mSysStatusReg.StatusBit.OCD;
+	batteryStatus.bit.OVERVOLTAGE = mSysStatusReg.StatusBit.OV;
+	batteryStatus.bit.UNDERVOLTAGE = mSysStatusReg.StatusBit.UV;
+	batteryStatus.bit.EXTERNAL_DISABLE = mSysStatusReg.StatusBit.OVRD_ALERT;
+	batteryStatus.bit.IC_FAULT = mSysStatusReg.StatusBit.DEVICE_XREADY;
+	batteryStatus.bit.SHORTCIRCUIT = mSysStatusReg.StatusBit.SCD;
+	return batteryStatus;
+}
+
+BatteryInterface::BatteryState_t BatteryInterface::getState(void)
+{
+	return mState;
+}
+
+uint16_t BatteryInterface::getCell1Voltage(void)
+{
+	return mCell1;
+}
+
+uint16_t BatteryInterface::getCell2Voltage(void)
+{
+	return mCell2;
+}
+
+uint16_t BatteryInterface::getCell3Voltage(void)
+{
+	return mCell3;
+}
+
+uint16_t BatteryInterface::getCurrent(void)
+{
+	return mCurrent;
+}
+
+uint16_t BatteryInterface::getTemp(void)
+{
+	return mTemp;
+}
+
 bool BatteryInterface::i2cBlockWriteWithCrc(uint8_t registerAddr, uint8_t* data, uint8_t len)
 {
 	uint8_t* buffer = new uint8_t[len * 2];
@@ -218,7 +336,10 @@ uint8_t BatteryInterface::i2cReadWithCrc(uint8_t registerAddr)
 	if (valid) {
 		return buffer[0];
 	} else {
+<<<<<<< HEAD
 		DLOG_WARNING("I2C read failed");
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 		return 0;
 	}
 }
@@ -251,6 +372,7 @@ bool BatteryInterface::configureBq76920(void)
 	mSysCtrl2Reg.SysCtrl2Bit.DELAY_DIS = false;
 	mSysCtrl2Reg.SysCtrl2Bit.CC_EN = true;
 	mSysCtrl2Reg.SysCtrl2Bit.CC_ONESHOT = false;
+<<<<<<< HEAD
 	mSysCtrl2Reg.SysCtrl2Bit.DSG_ON = true;
 	mSysCtrl2Reg.SysCtrl2Bit.CHG_ON = true;
 
@@ -266,6 +388,15 @@ bool BatteryInterface::configureBq76920(void)
 
 	mSysCtrl2Reg.SysCtrl2Byte = i2cReadWithCrc(SYS_CTRL2);
 	DLOG_INFO("BQ25713 Write Confirm: DSG_ON=%s CHG_ON=%s", mSysCtrl2Reg.SysCtrl2Bit.DSG_ON ? "ON" : "OFF", mSysCtrl2Reg.SysCtrl2Bit.CHG_ON ? "ON" : "OFF");
+=======
+	mSysCtrl2Reg.SysCtrl2Bit.DSG_ON = false;
+	mSysCtrl2Reg.SysCtrl2Bit.CHG_ON = false;
+
+	bool status = true;
+	status &= i2cWriteWithCrc(CELLBAL1,  mCellConfigReg.CellBal1Byte);
+	status &= i2cWriteWithCrc(SYS_CTRL1, mSysCtrl1Reg.SysCtrl1Byte);
+	status &= i2cWriteWithCrc(SYS_CTRL2, mSysCtrl2Reg.SysCtrl2Byte);
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 	return status;
 }
 
@@ -316,8 +447,11 @@ void BatteryInterface::onTimerExpire(uint32_t userData)
 	combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
 	mCell3 = static_cast<uint16_t>(combined * 382 / 10000);
 
+<<<<<<< HEAD
 	DLOG_DEBUG("Cell1=%dV Cell2=%dV Cell3=%dV", mCell1, mCell2, mCell3);
 
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 	uint8_t batPercentEstimate = getPercentEstimateFromVoltage();
 	if (batPercentEstimate == 0) mState = DEAD;
 	else if (batPercentEstimate <= 5) mState = CRITICAL;

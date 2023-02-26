@@ -7,13 +7,17 @@
 
 
 #include "../../include/hw/UsbController.h"
+<<<<<<< HEAD
 #include "../../include/hw/I2cInterface.h"
 #include "../../include/core/DevLog.h"
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 
 
 namespace hermes {
 namespace hw {
 
+<<<<<<< HEAD
 UsbController::UsbController(void)
 	: BaseApp()
 	, mStatusTimer(this, &UsbController::onStatusTimerExpire)
@@ -117,6 +121,8 @@ void UsbController::onFaultPinChange(Pin_t pin, int16_t value)
 	DLOG_INFO("usb c FAULT pin changed [%s]", value == 0x01 ? "FAULT" : "NO FAULT");
 	return;
 }
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 
 }
 }

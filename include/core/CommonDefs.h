@@ -70,10 +70,18 @@ enum MaxSpeed_t
 
 enum MaxAccel_t
 {
+<<<<<<< HEAD
     SLOW = 0,
     NORMAL = 1,
     FAST = 2,
     RACE = 3
+=======
+    MINISCULE = 0,
+    SLOW = 1,
+    NORMAL = 2,
+    FAST = 3,
+    RACE = 4
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 };
 
 enum Control_t
@@ -100,6 +108,7 @@ enum Pin_t : int8_t
     USBC_FLIP_PIN = 33,
     USBC_FAULT_PIN = 34,
     I2C_EN_PIN = 30,
+<<<<<<< HEAD
     CHG_LED = A1,
     MOT_EN_LED = A3,
     USER_LED = A4,
@@ -108,6 +117,8 @@ enum Pin_t : int8_t
     MOTOR_SENSE_H3 = A12,
     MOTOR_SENSE_TPM = A15,
     MOT_EN = A0
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 };
 
 enum DevLogLevel_t : int8_t

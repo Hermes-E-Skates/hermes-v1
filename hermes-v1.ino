@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------
 
 
+
 #include <Wire.h>
 #include <ArduinoSTL.h>
 #include "include/core/EventLoop.h"
@@ -27,4 +28,7 @@ void loop()
 {
     core::EventLoop::getInstance()->processEvents();
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
