@@ -38,12 +38,8 @@ public:
     BluetoothCommand(CmdId_t id);
     CmdId_t getCmdId(void) const;
     bool valid(void) const;
-<<<<<<< HEAD
     void setValid(bool valid);
 	virtual bool decode(const uint8_t* const bytes, uint8_t len) = 0;
-=======
-	virtual bool decode(uint8_t* const bytes, uint8_t len) = 0;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 
 private:
 

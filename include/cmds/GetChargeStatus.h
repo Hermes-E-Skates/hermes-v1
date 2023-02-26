@@ -22,10 +22,6 @@ union ChargeStatus_t
 {
     struct __attribute__((packed))
     {
-<<<<<<< HEAD
-=======
-        uint8_t STATE : 2; // FAULT DEAD_BATTERY READY CHARGING 
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
         uint8_t INPUT_SOURCE_OK : 1;
         uint8_t IN_FAST_CHARGE : 1;
         uint8_t IN_PRE_CHARGE : 1;
@@ -44,11 +40,7 @@ public:
     GetChargeStatusCmd(void);
 
 private:
-<<<<<<< HEAD
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
-=======
-    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 };
 
 

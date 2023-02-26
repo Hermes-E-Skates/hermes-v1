@@ -16,8 +16,6 @@
 namespace hermes {
 namespace hw {
 
-<<<<<<< HEAD
-
 union PdStatus_t
 {
 	struct
@@ -93,15 +91,6 @@ private:
 
 	void onStatusTimerExpire(uint32_t userData);
 	void onFaultPinChange(Pin_t, int16_t value);
-=======
-class UsbController {
-public:
-
-
-private:
-
-
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 };
 
 }

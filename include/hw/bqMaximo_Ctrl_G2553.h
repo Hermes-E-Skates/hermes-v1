@@ -45,31 +45,6 @@
 
 #define DELAY_LIMIT 0xffff
 
-<<<<<<< HEAD
-=======
-#define SYS_STAT 0
-#define CELLBAL1 1
-#define CELLBAL2 2
-#define CELLBAL3 3
-#define SYS_CTRL1 4
-#define SYS_CTRL2 5
-#define PROTECT1 0x06
-#define PROTECT2 0x07
-#define PROTECT3 0x08
-#define OV_TRIP 0x09
-#define UV_TRIP 0x0A
-#define VC1_HI_BYTE 0x0C
-#define VC1_LO_BYTE 0x0D
-#define VC2_HI_BYTE 0x0E
-#define VC2_LO_BYTE 0x0F
-#define VC5_HI_BYTE 0x14
-#define VC5_LO_BYTE 0x15
-#define TS1_HI 0x2C
-#define TS1_LO 0x2D
-#define CC_HI 0x32
-#define CC_LO 0x33
-
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 #define ADCGAIN1 0x50
 #define ADCOFFSET 0x51
 #define ADCGAIN2 0x59

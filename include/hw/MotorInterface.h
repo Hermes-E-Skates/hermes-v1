@@ -18,7 +18,6 @@ namespace hw {
 
 class MotorInterface {
 public:
-<<<<<<< HEAD
 	void setThrottleInput(float throttle);
 	void setMaxSpeed(MaxSpeed_t maxSpeed);
 	void setMaxAccel(MaxAccel_t maxAccel);
@@ -31,13 +30,6 @@ private:
 	MaxSpeed_t mMaxSpeed = UNLIMITED;
 	MaxAccel_t mMaxAccel = NORMAL;
 	bool mMotorEnabled = false;
-=======
-
-
-private:
-
-
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 };
 
 }
