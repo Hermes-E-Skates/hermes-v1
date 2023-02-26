@@ -25,8 +25,6 @@ namespace hermes {
 #define DLOG_CRITICAL(fmt, ...) if( DevLog::level >= CRITICAL ) { DevLog::print(("%s: %d: %s(): " fmt "\n"), __FILENAME__, __LINE__, __func__, ##__VA_ARGS__); } 
 
 
-typedef uint8_t DevLogLevel;
-
 class DevLog
 {
 public:
@@ -46,7 +44,7 @@ public:
     // ---------------------------------------------------------------
     static int print(const char* msg, ...);
 
-    static DevLogLevel level;
+    static DevLogLevel_t level;
 
 private:
     // ---------------------------------------------------------------

@@ -20,6 +20,28 @@
 namespace hermes {
 namespace hw {
 
+constexpr uint8_t SYS_STAT = 0;
+constexpr uint8_t CELLBAL1 = 1;
+constexpr uint8_t CELLBAL2 = 2;
+constexpr uint8_t CELLBAL3 = 3;
+constexpr uint8_t SYS_CTRL1 = 4;
+constexpr uint8_t SYS_CTRL2 = 5;
+constexpr uint8_t PROTECT1 = 0x06;
+constexpr uint8_t PROTECT2 = 0x07;
+constexpr uint8_t PROTECT3 = 0x08;
+constexpr uint8_t OV_TRIP = 0x09;
+constexpr uint8_t UV_TRIP = 0x0A;
+constexpr uint8_t VC1_HI_BYTE = 0x0C;
+constexpr uint8_t VC1_LO_BYTE = 0x0D;
+constexpr uint8_t VC2_HI_BYTE = 0x0E;
+constexpr uint8_t VC2_LO_BYTE = 0x0F;
+constexpr uint8_t VC5_HI_BYTE = 0x14;
+constexpr uint8_t VC5_LO_BYTE = 0x15;
+constexpr uint8_t TS1_HI = 0x2C;
+constexpr uint8_t TS1_LO = 0x2D;
+constexpr uint8_t CC_HI = 0x32;
+constexpr uint8_t CC_LO = 0x33;
+
 class BatteryInterface : public core::BaseApp {
 public:
 	enum BatteryState_t {

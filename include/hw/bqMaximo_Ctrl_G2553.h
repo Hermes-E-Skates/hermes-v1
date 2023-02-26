@@ -45,6 +45,8 @@
 
 #define DELAY_LIMIT 0xffff
 
+<<<<<<< HEAD
+=======
 #define SYS_STAT 0
 #define CELLBAL1 1
 #define CELLBAL2 2
@@ -67,6 +69,7 @@
 #define CC_HI 0x32
 #define CC_LO 0x33
 
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 #define ADCGAIN1 0x50
 #define ADCOFFSET 0x51
 #define ADCGAIN2 0x59

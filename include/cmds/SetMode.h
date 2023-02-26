@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------
 
 
-#ifndef GETID_H_
-#define GETID_H_
+#ifndef SETMODE_H_
+#define SETMODE_H_
 
 
 #include "../core/CommonDefs.h"
@@ -18,32 +18,26 @@
 namespace hermes {
 namespace bt {
 
-class GetIdCmd : public BluetoothCommand
+class SetModeCmd : public BluetoothCommand
 {
 public:
-    GetIdCmd(void);
+    SetModeCmd(void);
+    Control_t getControlMode(void) const;
 
 private:
-<<<<<<< HEAD
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
-=======
-    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
+    Control_t mControl;
 };
 
-
-class GetIdResp : public BluetoothResponse
+class SetModeResp : public BluetoothResponse
 {
 public:
-    GetIdResp(bool ack);
-    void setIdentifier(Identifier_t partno);
+    SetModeResp(bool ack);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
-    Identifier_t mIdentifier;
 };
 
 }
 }
-
-#endif // GETINFO_H_
+#endif // SETMODE_H_

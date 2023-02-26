@@ -30,5 +30,10 @@ bool BluetoothCommand::valid(void) const
 	return mValid;
 }
 
+void BluetoothCommand::setValid(bool valid)
+{
+	mValid = valid;
+}
+
 }
 }

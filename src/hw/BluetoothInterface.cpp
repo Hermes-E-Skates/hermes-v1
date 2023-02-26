@@ -84,7 +84,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 			break;
 		}
 
-		bool dataLen = cmdLen - 3;
+		uint8_t dataLen = cmdLen - 3;
 		const uint8_t* data = nullptr;
 
 		if (dataLen > 0) {
@@ -92,7 +92,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		CmdId_t cmdId = static_cast<CmdId_t>(cmdIdByte);
-		DLOG_DEBUG("New cmd with id=%d", cmdId);
+		DLOG_DEBUG("New cmd with id=%d, len=%d, datasize=%d", cmdId, cmdLen, dataLen);
 
 		switch(cmdId) {
 		case HEARTBEAT:
@@ -116,14 +116,36 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 			break;
 
 		case GET_IMU:
+			//cmd = new GetInfoCmd();
+			break;
+
 		case GET_BATTERY:
+			cmd = new GetBatteryCmd();
+			break;
+
 		case SET_MODE:
+			cmd = new SetModeCmd();
+			break;
+
 		case SET_MAX_ACCEL:
+			cmd = new SetMaxAccelCmd();
+			break;
+
 		case SET_MAX_SPEED:
+			cmd = new SetMaxSpeedCmd();
+			break;
+
 		case SET_THROTTLE:
+			cmd = new SetThrottleCmd();
+			break;
+
 		default:
 			break;
 		}
+
+		bool isValid = cmd->decode(data, dataLen);
+		cmd->setValid(isValid);
+
 	} while(0);
 
 	return cmd;
@@ -162,6 +184,9 @@ BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)
 	} else {
 		mHeartbeatTimer.start(HEARTBEAT_INTERVAL, ONESHOT, 0);
 	}
+
+	HeartbeatResp* resp = new HeartbeatResp(cmd->valid());
+	return resp;
 }
 
 bool BluetoothInterface::registerSerialHandler(BaseBluetoothHandler* handler)
@@ -185,6 +210,7 @@ bool BluetoothInterface::sendATCommand(const std::string& AT) const
 		Serial3.write(AT.c_str(), AT.size());
 		return true;
 	} else {
+		DLOG_WARNING("Cannot send AT commands while connection is established.")
 		return false;
 	}
 }

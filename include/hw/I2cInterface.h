@@ -20,7 +20,9 @@ namespace hw {
 class I2cInterface {
 public:
 	static I2cInterface* getInstance(void);
+	bool i2cWrite(uint8_t slaveAddr, uint16_t registerAddr, uint8_t* data, uint8_t len) const;
 	bool i2cWrite(uint8_t slaveAddr, uint8_t registerAddr, uint8_t* data, uint8_t len) const;
+	bool i2cRead(uint8_t slaveAddr, uint16_t registerAddr, uint8_t* data, uint8_t len) const;
 	bool i2cRead(uint8_t slaveAddr, uint8_t registerAddr, uint8_t* data, uint8_t len) const;
 
 private:

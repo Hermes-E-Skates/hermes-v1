@@ -19,10 +19,16 @@ HermesController controller;
 
 void setup()
 {
+    // Lag the bootup to ensure all IC's are at a stable voltage
+    delay(1000);
     core::EventLoop::getInstance()->init();
-}
+  }
 
 void loop()
 {
     core::EventLoop::getInstance()->processEvents();
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394

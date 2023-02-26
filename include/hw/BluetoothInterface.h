@@ -21,6 +21,11 @@
 #include "../cmds/GetFault.h"
 #include "../cmds/GetId.h"
 #include "../cmds/GetChargeStatus.h"
+#include "../cmds/GetBattery.h"
+#include "../cmds/SetMode.h"
+#include "../cmds/SetThrottle.h"
+#include "../cmds/SetMaxSpeed.h"
+#include "../cmds/SetMaxAccel.h"
 #include "../cmds/Heartbeat.h"
 
 

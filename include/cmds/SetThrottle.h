@@ -6,8 +6,8 @@
 // ---------------------------------------------------------------
 
 
-#ifndef GETID_H_
-#define GETID_H_
+#ifndef SETTHROTTLE_H_
+#define SETTHROTTLE_H_
 
 
 #include "../core/CommonDefs.h"
@@ -18,32 +18,26 @@
 namespace hermes {
 namespace bt {
 
-class GetIdCmd : public BluetoothCommand
+class SetThrottleCmd : public BluetoothCommand
 {
 public:
-    GetIdCmd(void);
+    SetThrottleCmd(void);
+    float getPercentage(void) const;
 
 private:
-<<<<<<< HEAD
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
-=======
-    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
+    uint8_t mThrottle;
 };
 
-
-class GetIdResp : public BluetoothResponse
+class SetThrottleResp : public BluetoothResponse
 {
 public:
-    GetIdResp(bool ack);
-    void setIdentifier(Identifier_t partno);
+    SetThrottleResp(bool ack);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
-    Identifier_t mIdentifier;
 };
 
 }
 }
-
 #endif // GETINFO_H_

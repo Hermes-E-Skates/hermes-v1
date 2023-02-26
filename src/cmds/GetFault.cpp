@@ -18,7 +18,11 @@ GetFaultCmd::GetFaultCmd(void)
 	return;
 }
 
+<<<<<<< HEAD
+bool GetFaultCmd::decode(const uint8_t* const bytes, uint8_t len)
+=======
 bool GetFaultCmd::decode(uint8_t* const bytes, uint8_t len)
+>>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 {
 	// No data
 	return true;
@@ -40,7 +44,6 @@ void GetFaultResp::encodeData(std::vector<uint8_t>& bytes)
 	bytes.push_back(mFaultStatus.byte);
 	return;
 }
-
 
 }
 }
