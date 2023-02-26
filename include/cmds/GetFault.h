@@ -41,11 +41,7 @@ public:
     GetFaultCmd(void);
 
 private:
-<<<<<<< HEAD
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
-=======
-    virtual bool decode(uint8_t* const bytes, uint8_t len) override;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 
     bool mValid = false;
     CmdId_t mCmdId = UNKNOWN_CMD;

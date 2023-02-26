@@ -11,11 +11,7 @@
 
 namespace hermes {
 
-<<<<<<< HEAD
 DevLogLevel_t DevLog::level = DEBUG;
-=======
-DevLogLevel DevLog::level = INFO;
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 
 // ---------------------------------------------------------------
 // @Brief: Constructor is empty.

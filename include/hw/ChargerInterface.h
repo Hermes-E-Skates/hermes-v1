@@ -27,7 +27,6 @@ public:
 	virtual void loop() override;
 	virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
 
-<<<<<<< HEAD
 	bool isI2cLinkEstablished(void) const;
 	bool startCharging(void);
 	void stopCharging(void);
@@ -38,17 +37,6 @@ public:
 
 private:
 	bool configureBq25713(void) const;
-=======
-	void startCharging(void);
-	void stopCharging(void);
-	bool setChargeSpeed(ChargeSpeed_t chargeSpeed);
-	uint8_t getInputCurrent(void) const;
-	uint8_t getInputVoltage(void) const;
-	bt::ChargeStatus_t getChargerStatus(void) const;
-
-private:
-	bool configureBq25713(void);
->>>>>>> e09fda06d7e08a289f39b5ee8a5606873968e394
 	void onWdogTimerExpire(uint32_t userData);
 	void onFaultStatusTimerExpire(uint32_t userData);
 
