@@ -16,20 +16,37 @@
 namespace hermes {
 namespace hw {
 
-class MotorInterface {
+class MotorInterface : core::BaseApp {
 public:
+	MotorInterface(void);
+
+	virtual bool init(void) override;
+	virtual void loop(void) override;
+	virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
+
 	void setThrottleInput(float throttle);
 	void setMaxSpeed(MaxSpeed_t maxSpeed);
 	void setMaxAccel(MaxAccel_t maxAccel);
 	MaxSpeed_t getMaxSpeed(void) const;
 	MaxAccel_t getMaxAccel(void) const;
+	void motorOn(void);
+	void motorOff(void);
 	void enableMotor(void);
 	void disableMotor(void);
+	uint8_t getSpeedKmh(void);
 
 private:
 	MaxSpeed_t mMaxSpeed = UNLIMITED;
 	MaxAccel_t mMaxAccel = NORMAL;
+	bool mMotorOn = false;
 	bool mMotorEnabled = false;
+	uint8_t mPwmSignal = 0;
+	uint8_t mThrottle = 0;
+	uint32_t mLastTimeUpdated = 0;
+	uint16_t mIntervalOfIncrease = 10;
+	core::GenericTimer<MotorInterface> mWheelSpeedTimer;
+
+	void onTimerExpire(uint32_t userdata);
 };
 
 }

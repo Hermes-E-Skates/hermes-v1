@@ -9,6 +9,7 @@
 #include "../../include/hw/UsbController.h"
 #include "../../include/hw/I2cInterface.h"
 #include "../../include/core/DevLog.h"
+#include "../../include/messages/ChargeRdyMsg.h"
 
 
 namespace hermes {
@@ -21,6 +22,7 @@ UsbController::UsbController(void)
 {
 	return;
 }
+
 
 bool UsbController::init(void)
 {
@@ -47,8 +49,6 @@ bool UsbController::init(void)
 		DLOG_DEBUG("Err: reset usb c ctrl failed");
 	}
 
-
-
 	uint8_t data = 0b11111111;
 	if (I2cInterface::getInstance()->i2cWrite(CYPD3177_I2C_ADDR, SELECT_SINK_PDO, &data, 1))
 	{
@@ -70,29 +70,60 @@ void UsbController::onCriticalFault(const core::CriticalFault& criticalFault)
 	return;
 }
 
-uint16_t UsbController::getVoltage()
+uint16_t UsbController::getVoltage(void)
 {
 	return uint16_t();
 }
 
-uint16_t UsbController::getCurrent()
+uint16_t UsbController::getCurrent(void)
 {
 	return uint16_t();
+}
+
+void UsbController::setState(UsbState_t state) 
+{
+	if (mState == CHARGE_READY && state != CHARGE_READY) { // Charge ready -> not ready
+		DLOG_INFO("usb-c charge rdy = NO");
+		messages::ChargeRdyMsg msg(false);
+		sendMessage(&msg);
+	} else if (mState != CHARGE_READY && state == CHARGE_READY) { // not ready -> charge ready
+		DLOG_INFO("usb-c charge rdy = YES");
+		messages::ChargeRdyMsg msg(true);
+		sendMessage(&msg);
+	}
+
+	mState = state;
+}
+
+bool UsbController::isI2cAlive(void) const
+{
+	Wire.beginTransmission(CYPD3177_I2C_ADDR);
+	return Wire.endTransmission() == 0;
 }
 
 void UsbController::onStatusTimerExpire(uint32_t userData)
 {
-	bool valid = I2cInterface::getInstance()->i2cRead(
-		CYPD3177_I2C_ADDR, PD_STATUS, reinterpret_cast<uint8_t*>(&mPdStatus.data), sizeof(PdStatus_t));
+	if (isI2cAlive()) {
+		bool valid = I2cInterface::getInstance()->i2cRead(CYPD3177_I2C_ADDR, PD_STATUS, reinterpret_cast<uint8_t*>(&mPdStatus.data), sizeof(PdStatus_t));
+		
+		if (valid && mPdStatus.bits.CONTRACT_STATE && (digitalRead(USBC_FAULT_PIN) == LOW)) {
+			setState(CHARGE_READY);
+		} else {
+			setState(LOW_VOLTAGE);
+		}
+
+		valid &= I2cInterface::getInstance()->i2cRead(CYPD3177_I2C_ADDR, BUS_VOLTAGE, &mVbus, 1);
+		DLOG_INFO("VBUS voltage is %d", mVbus);
+		DLOG_INFO("Fault pin is %s", digitalRead(USBC_FAULT_PIN) ? "HIGH" : "LOW");
+
+	} else {
+		setState(USB_OFF);
+	}
+
+
 	
-	valid &= I2cInterface::getInstance()->i2cRead(
-		CYPD3177_I2C_ADDR, BUS_VOLTAGE, &mVbus, 1);
 
-	valid &= I2cInterface::getInstance()->i2cRead(
-		CYPD3177_I2C_ADDR, EVENT_STATUS, reinterpret_cast<uint8_t*>(&mEventStatus.data), sizeof(EventStatus_t));
 
-	DLOG_INFO("VBUS voltage is %d", mVbus);
-	DLOG_INFO("Fault pin is %s", USBC_FAULT_PIN ? "HIGH" : "LOW");
 	//DLOG_INFO("BCR_CFG=0x%x DATA_ROLE=0x%x POWER_ROLE=0x%x CONTRACT_STATE=0x%x SINK_TX_RDY_STATUS=0x%x POLICY_ENGINE_STATE=0x%x PD_SPEC=0x%x PARTNER PD_SPEC=0x%x UNCHUNKED=0x%x"
 	//	, mPdStatus.bits.BCR_CFG, mPdStatus.bits.DATA_ROLE, mPdStatus.bits.POWER_ROLE, mPdStatus.bits.CONTRACT_STATE
 	//	, mPdStatus.bits.SINK_TX_RDY_STATUS, mPdStatus.bits.POLICY_ENGINE_STATE, mPdStatus.bits.PD_SPEC_SUPPORTED, mPdStatus.bits.PARTNER_PD_SPEC, mPdStatus.bits.UNCHUNKED);
@@ -106,7 +137,7 @@ void UsbController::onStatusTimerExpire(uint32_t userData)
 	//	, mEventStatus.bits.TYPE_C_ATTCH, mEventStatus.bits.TYPE_C_DISCON, mEventStatus.bits.PD_NEGOTIATED, mEventStatus.bits.POWER_ROLE_SWAP, mEventStatus.bits.DATA_ROLE_SWAP, mEventStatus.bits.VCON_SWAP);
 	
 	// Write the same bits back to clear them.
-	valid &= I2cInterface::getInstance()->i2cWrite(CYPD3177_I2C_ADDR, EVENT_STATUS, reinterpret_cast<uint8_t*>(&mEventStatus.data), sizeof(EventStatus_t));
+	//valid &= I2cInterface::getInstance()->i2cWrite(CYPD3177_I2C_ADDR, EVENT_STATUS, reinterpret_cast<uint8_t*>(&mEventStatus.data), sizeof(EventStatus_t));
 	//DLOG_DEBUG("ValidI2c=%s", valid ? "true" : "false");
 
 	return;
