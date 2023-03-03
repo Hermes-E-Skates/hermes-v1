@@ -70,10 +70,16 @@ public:
 	void loop(void) override;
 	void onCriticalFault(const core::CriticalFault& criticalFault) override;
 
-	uint16_t getVoltage();
-	uint16_t getCurrent();
+	uint16_t getVoltage(void);
+	uint16_t getCurrent(void);
 
 private:
+	enum UsbState_t {
+		USB_OFF,
+		LOW_VOLTAGE,
+		CHARGE_READY
+	} mState = USB_OFF;
+
 	const uint16_t BUS_VOLTAGE = 0x100D;
 	const uint16_t PD_STATUS = 0x1008;
 	const uint16_t TYPE_C_STATUS = 0x100C;
@@ -89,6 +95,8 @@ private:
 	EventStatus_t mEventStatus;
 	uint8_t mVbus;
 
+	void setState(UsbState_t state);
+	bool isI2cAlive(void) const;
 	void onStatusTimerExpire(uint32_t userData);
 	void onFaultPinChange(Pin_t, int16_t value);
 };

@@ -11,7 +11,7 @@
 #include <ArduinoSTL.h>
 #include "include/core/EventLoop.h"
 #include "include/HermesController.h"
-
+#include "include/messages/SleepStateMsg.h"
 
 using namespace hermes;
 
@@ -22,6 +22,7 @@ void setup()
     // Lag the bootup to ensure all IC's are at a stable voltage
     delay(1000);
     core::EventLoop::getInstance()->init();
+    controller.changeState(HermesController::MOTOR_DISABLED);
   }
 
 void loop()

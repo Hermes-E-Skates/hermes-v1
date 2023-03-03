@@ -51,7 +51,6 @@ public:
     void setBatteryStatus(const BatteryStatus_t current);
     void setCellVoltage(uint16_t cell1, uint16_t cell2, uint16_t cell3);
     void setTemp(uint16_t temp);
-    void setCurrent(uint16_t current);
 
 private:
     virtual void encodeData(std::vector<uint8_t>& bytes) override;
@@ -61,7 +60,6 @@ private:
     uint16_t mCell2;
     uint16_t mCell3;
     uint16_t mTemp;
-    uint16_t mCurrent;
 };
 
 }

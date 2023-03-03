@@ -47,11 +47,6 @@ void GetBatteryResp::setTemp(uint16_t temp)
 	mTemp = temp;
 }
 
-void GetBatteryResp::setCurrent(uint16_t current)
-{
-	mCurrent = current;
-}
-
 
 void GetBatteryResp::encodeData(std::vector<uint8_t>& bytes)
 {
@@ -64,8 +59,6 @@ void GetBatteryResp::encodeData(std::vector<uint8_t>& bytes)
 	bytes.push_back(static_cast<uint8_t>((mCell3 & 0xFF00) >> 8));
 	bytes.push_back(static_cast<uint8_t>(mTemp & 0x00FF));
 	bytes.push_back(static_cast<uint8_t>((mTemp & 0xFF00) >> 8));
-	bytes.push_back(static_cast<uint8_t>(mCurrent & 0x00FF));
-	bytes.push_back(static_cast<uint8_t>((mCurrent & 0xFF00) >> 8));
 	return;
 }
 

@@ -28,29 +28,35 @@
 #include "cmds/SetMaxSpeed.h"
 #include "cmds/SetMaxAccel.h"
 #include "cmds/SetThrottle.h"
+#include "cmds/SetMotorEnable.h"
 #include "core/CommonDefs.h"
+#include "core/MessageHandler.h"
+#include "messages/ChargeRdyMsg.h"
+#include "messages/BluetoothStatusMsg.h"
 
 
 namespace hermes {
 
 class HermesController : core::BaseApp {
 public:
-	HermesController(void);
-
-	bool init(void) override;
-	void loop(void) override;
-	void onCriticalFault(const core::CriticalFault& criticalFault) override;
-
-private:
 	enum State_t : uint8_t {
 		INIT = 0,
 		FAULT = 1,
 		SLEEP = 2,
 		MOTOR_DISABLED = 3,
-		READY = 4,
-		CHARGING = 5
+		MOTOR_OFF = 4,
+		READY = 5,
+		CHARGING = 6
 	} mState = INIT;
 
+	HermesController(void);
+
+	bool init(void) override;
+	void loop(void) override;
+	void onCriticalFault(const core::CriticalFault& criticalFault) override;
+	void changeState(State_t state);
+
+private:
 	Identifier_t mIdentifier = UNKNOWN_ID;
 	Control_t mControl = OFF;
 
@@ -62,6 +68,8 @@ private:
 	hw::UsbController mUsbController;
 
 	core::GenericObserver<HermesController> mButtonPressPinWatcher;
+	core::MsgHandler<HermesController, messages::ChargeRdyMsg> mChargeRdyMsgHandler;
+	core::MsgHandler<HermesController, messages::BluetoothStatusMsg> mBluetoothStatusMsg;
 	bt::GenericBluetoothHandler<HermesController, bt::GetInfoCmd> mGetInfoCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::GetFaultCmd> mGetFaultCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::GetBatteryCmd> mGetBatteryCmdHandler;
@@ -70,10 +78,10 @@ private:
 	bt::GenericBluetoothHandler<HermesController, bt::SetMaxAccelCmd> mSetMaxAccelCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::SetMaxSpeedCmd> mSetMaxSpeedCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::SetModeCmd> mSetModeCmdHandler;
+	bt::GenericBluetoothHandler<HermesController, bt::SetMotorEnableCmd> mSetMotorEnableCmdHandler;
 
 	void enterSleep(void);
 	void pullbackFromSleep(void);
-	void changeState(State_t state);
 	void configureGpios(void);
 	bt::BluetoothResponse* handleGetInfoCmd(const bt::GetInfoCmd* cmd);
 	bt::BluetoothResponse* handleGetFaultCmd(const bt::GetFaultCmd* cmd);
@@ -83,6 +91,9 @@ private:
 	bt::BluetoothResponse* handleSetMaxAccelCmd(const bt::SetMaxAccelCmd* cmd);
 	bt::BluetoothResponse* handleSetMaxSpeedCmd(const bt::SetMaxSpeedCmd* cmd);
 	bt::BluetoothResponse* handleSetModeCmd(const bt::SetModeCmd* cmd);
+	bt::BluetoothResponse* handleSetMotorEnCmd(const bt::SetMotorEnableCmd* cmd);
+	void handleChargeRdyMsg(const messages::ChargeRdyMsg* msg);
+	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);
 };
 

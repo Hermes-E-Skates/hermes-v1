@@ -33,7 +33,10 @@ typedef void(*Action)();
 enum MsgId_t {
     UNKNOWN_MSG,
     CRITICAL_FAULT_MSG,
-    CHARGE_STATUS_MSG
+    CHARGE_STATUS_MSG,
+    CHARGE_RDY_MSG,
+    BLUETOOTH_STATUS_MSG,
+    SLEEP_STATE_MSG
 };
 
 enum BaudRate_t

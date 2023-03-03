@@ -8,6 +8,7 @@
 
 #include "../../include/hw/BluetoothInterface.h"
 #include "../../include/core/DevLog.h"
+#include "../../include/messages/BluetoothStatusMsg.h"
 
 
 namespace hermes {
@@ -24,7 +25,7 @@ uint8_t inline findByte(uint8_t target, uint8_t* const bytes, uint8_t len)
 BluetoothInterface::BluetoothInterface()
 	: BaseApp()
 	, mHeartbeatHandler(this, &BluetoothInterface::handleHeartbeat, HEARTBEAT)
-	, mHeartbeatTimer(this, &BluetoothInterface::onHeartbeatTimerExpire)
+	, mHeartbeatTimeoutTimer(this, &BluetoothInterface::onHeartbeatTimerExpire)
 {
 	return;
 }
@@ -64,17 +65,15 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 	BluetoothCommand* cmd = nullptr;
 
 	do {
-		uint8_t stxBytePos = bt::findByte(STX, buffer, len);
-		uint8_t eotBytePos = bt::findByte(EOT, buffer, len);
-
-		if (stxBytePos == NOT_FOUND || eotBytePos == NOT_FOUND) {
-			// We NEED both the STX and EOT bytes
+		constexpr uint8_t MIN_CMD_SIZE = 3;
+		if (len < MIN_CMD_SIZE) {
+			// Not enough bytes to make a cmd
 			break;
 		}
 
-		uint8_t cmdLen = eotBytePos - stxBytePos + 1;
-		if (cmdLen < 3) {
-			// We NEED at least 3 bytes, STX ID EOT
+		uint8_t stxBytePos = bt::findByte(STX, buffer, len);
+		if (stxBytePos == NOT_FOUND || stxBytePos + 2 >= len) {
+			// We NEED the STX, and 2 more bytes after it.
 			break;
 		}
 
@@ -84,7 +83,12 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 			break;
 		}
 
-		uint8_t dataLen = cmdLen - 3;
+		uint8_t dataLen = buffer[stxBytePos + 2];
+		if (stxBytePos + 2 + dataLen >= len) {
+			// STX + CMD ID + SIZE + DATA is too large, not enough bytes received
+			break;
+		}
+
 		const uint8_t* data = nullptr;
 
 		if (dataLen > 0) {
@@ -92,7 +96,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		CmdId_t cmdId = static_cast<CmdId_t>(cmdIdByte);
-		DLOG_DEBUG("New cmd with id=%d, len=%d, datasize=%d", cmdId, cmdLen, dataLen);
+		DLOG_DEBUG("New cmd with id=%d, datasize=%d", cmdId, dataLen);
 
 		switch(cmdId) {
 		case HEARTBEAT:
@@ -139,6 +143,10 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 			cmd = new SetThrottleCmd();
 			break;
 
+		case SET_MOTOR_EN:
+			cmd = new SetMotorEnableCmd();
+			break;
+
 		default:
 			break;
 		}
@@ -172,17 +180,28 @@ void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 
 void BluetoothInterface::onHeartbeatTimerExpire(uint32_t userdata)
 {
+	if (mConnected == true) {
+		DLOG_WARNING("Bluetooth connection lost.");
+		messages::BluetoothStatusMsg msg(false);
+		sendMessage(&msg);
+	}
 	mConnected = false;
-	DLOG_WARNING("Bluetooth connection lost.");
+	return;
 }
 
 BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)
 {
+	if (mConnected == false) {
+		DLOG_WARNING("Bluetooth connection established.");
+		messages::BluetoothStatusMsg msg(true);
+		sendMessage(&msg);
+	}
+
 	mConnected = true;
-	if (mHeartbeatTimer.isEnabled()) {
-		mHeartbeatTimer.restart();
+	if (mHeartbeatTimeoutTimer.isEnabled()) {
+		mHeartbeatTimeoutTimer.restart();
 	} else {
-		mHeartbeatTimer.start(HEARTBEAT_INTERVAL, ONESHOT, 0);
+		mHeartbeatTimeoutTimer.start(HEARTBEAT_TIMEOUT, ONESHOT, 0);
 	}
 
 	HeartbeatResp* resp = new HeartbeatResp(cmd->valid());
