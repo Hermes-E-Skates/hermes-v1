@@ -58,15 +58,12 @@ public:
 
 	uint8_t lerp(uint16_t lowVoltage, uint16_t highVoltage, uint16_t voltage, uint8_t lowPercent, uint8_t highPercent) const;
 	uint8_t getPercentEstimateFromVoltage() const;
-	bool enableDischarge(void);
-	bool enableCharge(void);
 	bool clearFault(void);
 	bt::BatteryStatus_t getBatteryStatus(void);
 	BatteryState_t getState(void);
 	uint16_t getCell1Voltage(void);
 	uint16_t getCell2Voltage(void);
 	uint16_t getCell3Voltage(void);
-	uint16_t getCurrent(void);
 	uint16_t getTemp(void);
 	
 
@@ -81,7 +78,6 @@ private:
 	bool configureBq76920(void);
 
 	void onTimerExpire(uint32_t userData);
-	void onAlertPinChange(Pin_t pin, int16_t pinStatus);
 
 	SysStatus_t mSysStatusReg;
 	SysCtrl1_t mSysCtrl1Reg;
@@ -92,9 +88,7 @@ private:
 	uint16_t mCell2 = 0;
 	uint16_t mCell3 = 0;
 	uint16_t mTemp = 0;
-	uint16_t mCurrent = 0;
 	core::GenericTimer<BatteryInterface> mStatusPollTimer;
-	core::GenericObserver<BatteryInterface> mAlertPinWatcher;
 };
 
 }

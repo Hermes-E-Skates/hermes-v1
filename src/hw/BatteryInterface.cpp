@@ -41,20 +41,16 @@ unsigned char CRC8(unsigned char* ptr, unsigned char len, unsigned char key)
 BatteryInterface::BatteryInterface()
 	: BaseApp()
 	, mStatusPollTimer(this, &BatteryInterface::onTimerExpire)
-	, mAlertPinWatcher(this, &BatteryInterface::onAlertPinChange, BAT_ALERT_PIN)
 {
 	return;
 }
 
 bool BatteryInterface::init()
 {
-	bool status = registerObserver(&mAlertPinWatcher);
-	status &= registerTimer(&mStatusPollTimer);
-	status &= configureBq76920();
-
 	DLOG_INFO("INIT: BQ25713");
 	
-	mAlertPinWatcher.enable();
+	bool status = registerTimer(&mStatusPollTimer);
+	status &= configureBq76920();
 	mStatusPollTimer.start(1000, PERIODIC);
 	return status;
 }
@@ -129,16 +125,6 @@ uint8_t BatteryInterface::lerp(uint16_t lowVoltage, uint16_t highVoltage, uint16
 	return (lowPercent * (highVoltage - voltage) + highPercent * (voltage - lowVoltage)) / (highVoltage - lowVoltage);
 }
 
-bool BatteryInterface::enableDischarge(void)
-{
-	return false;
-}
-
-bool BatteryInterface::enableCharge(void)
-{
-	return false;
-}
-
 bool BatteryInterface::clearFault(void)
 {
 
@@ -175,11 +161,6 @@ uint16_t BatteryInterface::getCell2Voltage(void)
 uint16_t BatteryInterface::getCell3Voltage(void)
 {
 	return mCell3;
-}
-
-uint16_t BatteryInterface::getCurrent(void)
-{
-	return mCurrent;
 }
 
 uint16_t BatteryInterface::getTemp(void)
@@ -329,19 +310,6 @@ void BatteryInterface::onTimerExpire(uint32_t userData)
 	combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
 	mTemp = 25 - ((combined * 382 - 1.2 * 384) / 0.0042);
 	return;
-}
-
-void BatteryInterface::onAlertPinChange(Pin_t pin, int16_t pinStatus)
-{
-	if (pinStatus == LOW) {
-		// Alert set back to LOW: do nothing
-	} else if (pinStatus == HIGH) {
-		uint8_t buffer[4];
-		I2cInterface::getInstance()->i2cRead(BQ76920_I2C_ADDR, (uint8_t)0x32, buffer, 4);
-		uint16_t adc = buffer[0] << 8 & 0xFF00 + buffer[2] & 0x00FF;
-		uint32_t current = adc * 1; // Convert ADC to current reading.
-		// TODO: Save current readings somewhere that can be kept permanently
-	}
 }
 
 }

@@ -26,6 +26,7 @@
 #include "../cmds/SetThrottle.h"
 #include "../cmds/SetMaxSpeed.h"
 #include "../cmds/SetMaxAccel.h"
+#include "../cmds/SetMotorEnable.h"
 #include "../cmds/Heartbeat.h"
 
 
@@ -49,11 +50,11 @@ private:
 	void onHeartbeatTimerExpire(uint32_t userdata);
 	BluetoothResponse* handleHeartbeat(const HeartbeatCmd* cmd);
 
-	const uint16_t HEARTBEAT_INTERVAL = 1000;
+	const uint16_t HEARTBEAT_TIMEOUT = 1100;
 	bool mConnected = false;
 	std::vector<BaseBluetoothHandler*> mHandlers;
 	GenericBluetoothHandler<BluetoothInterface, HeartbeatCmd> mHeartbeatHandler;
-	core::GenericTimer<BluetoothInterface> mHeartbeatTimer;
+	core::GenericTimer<BluetoothInterface> mHeartbeatTimeoutTimer;
 };
 
 }
