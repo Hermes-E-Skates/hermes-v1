@@ -252,63 +252,89 @@ bool BatteryInterface::configureBq76920(void)
 
 void BatteryInterface::onTimerExpire(uint32_t userData)
 {
-	uint8_t buffer[2] = {0};
-	I2cInterface::getInstance()->i2cRead(BQ76920_I2C_ADDR, SYS_STAT, buffer, 2);
-	mSysStatusReg.StatusByte = buffer[0];
+		//Wire.beginTransmission(BQ76920_I2C_ADDR);
+		//Wire.write(0);
+		//bool success = (Wire.endTransmission(false) == 0);
 
-	bool latched = mSysStatusReg.StatusBit.OCD
-		| mSysStatusReg.StatusBit.DEVICE_XREADY
-		| mSysStatusReg.StatusBit.OCD
-		| mSysStatusReg.StatusBit.SCD
-		| mSysStatusReg.StatusBit.UV;
-	if (latched) {
-		if (mSysStatusReg.StatusBit.UV) {
-			core::CriticalFault cf(core::BATTERY_UNDERVOLT, core::BATTERY, micros(), "battery undervoltage lockout");
-			generateCriticalFault(cf);
-		}
-		if (mSysStatusReg.StatusBit.OV) {
-			core::CriticalFault cf(core::BATTERY_OVERVOLTAGE, core::BATTERY, micros(), "battery overvoltage error");
-			generateCriticalFault(cf);
-		}
-		if (mSysStatusReg.StatusBit.SCD) {
-			core::CriticalFault cf(core::BATTERY_SHORTCIRCUIT, core::BATTERY, micros(), "battery shortcircuit in discharge path");
-			generateCriticalFault(cf);
-		}
-		if (mSysStatusReg.StatusBit.DEVICE_XREADY) {
-			core::CriticalFault cf(core::BATTERY_CHIP_ERR, core::BATTERY, micros(), "unknown error in bq76920");
-			generateCriticalFault(cf);
-		}
-		i2cWriteWithCrc(SYS_STAT, 0xFF); // Clear faults by setting all bits to 1.
-		mSysStatusReg.StatusByte = 0x00;
-	}
+		//if (success) {
+		//	success = (Wire.requestFrom(BQ76920_I2C_ADDR, 2) == 2);
 
-	uint8_t low = i2cReadWithCrc(VC1_LO_BYTE);
-	uint8_t high = i2cReadWithCrc(VC1_HI_BYTE);
-	uint32_t combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
-	mCell1 = static_cast<uint16_t>(combined * 382 / 10000);
+		//	if (success) {
+		//		uint8_t bytes[2] = {};
+		//		//Wire.readBytes(bytes, 2);
+		//		bytes[0] = Wire.read();
+		//		bytes[1] = Wire.read();
+		//		success = (Wire.endTransmission() == 0);
+		//		if (success) {
+		//			DLOG_DEBUG("value=0x%X 0x%X", bytes[0], bytes[1]);
+		//		} else {
+		//			DLOG_ERROR("couldnt read bytes.")
+		//		}
+		//	} else {
+		//		DLOG_ERROR("i2c read request failed");
+		//	}
+		//} else {
+		//	DLOG_ERROR("i2c write slave addr and register failed");
+		//}
 
-	low = i2cReadWithCrc(VC2_LO_BYTE);
-	high = i2cReadWithCrc(VC2_HI_BYTE);
-	combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
-	mCell2 = static_cast<uint16_t>(combined * 382 / 10000);
 
-	low = i2cReadWithCrc(VC5_LO_BYTE);
-	high = i2cReadWithCrc(VC5_HI_BYTE);
-	combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
-	mCell3 = static_cast<uint16_t>(combined * 382 / 10000);
+	//uint8_t buffer[2] = {0};
+	//I2cInterface::getInstance()->i2cRead(BQ76920_I2C_ADDR, SYS_STAT, buffer, 2);
+	//mSysStatusReg.StatusByte = buffer[0];
 
-	DLOG_DEBUG("Cell1=%dV Cell2=%dV Cell3=%dV", mCell1, mCell2, mCell3);
+	//bool latched = mSysStatusReg.StatusBit.OCD
+	//	| mSysStatusReg.StatusBit.DEVICE_XREADY
+	//	| mSysStatusReg.StatusBit.OCD
+	//	| mSysStatusReg.StatusBit.SCD
+	//	| mSysStatusReg.StatusBit.UV;
+	//if (latched) {
+	//	if (mSysStatusReg.StatusBit.UV) {
+	//		core::CriticalFault cf(core::BATTERY_UNDERVOLT, core::BATTERY, micros(), "battery undervoltage lockout");
+	//		generateCriticalFault(cf);
+	//	}
+	//	if (mSysStatusReg.StatusBit.OV) {
+	//		core::CriticalFault cf(core::BATTERY_OVERVOLTAGE, core::BATTERY, micros(), "battery overvoltage error");
+	//		generateCriticalFault(cf);
+	//	}
+	//	if (mSysStatusReg.StatusBit.SCD) {
+	//		core::CriticalFault cf(core::BATTERY_SHORTCIRCUIT, core::BATTERY, micros(), "battery shortcircuit in discharge path");
+	//		generateCriticalFault(cf);
+	//	}
+	//	if (mSysStatusReg.StatusBit.DEVICE_XREADY) {
+	//		core::CriticalFault cf(core::BATTERY_CHIP_ERR, core::BATTERY, micros(), "unknown error in bq76920");
+	//		generateCriticalFault(cf);
+	//	}
+	//	i2cWriteWithCrc(SYS_STAT, 0xFF); // Clear faults by setting all bits to 1.
+	//	mSysStatusReg.StatusByte = 0x00;
+	//}
 
-	uint8_t batPercentEstimate = getPercentEstimateFromVoltage();
-	if (batPercentEstimate == 0) mState = DEAD;
-	else if (batPercentEstimate <= 5) mState = CRITICAL;
-	else if (batPercentEstimate <= 15) mState = WARNING;
-	else mState = READY;
+	//uint8_t low = i2cReadWithCrc(VC1_LO_BYTE);
+	//uint8_t high = i2cReadWithCrc(VC1_HI_BYTE);
+	//uint32_t combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
+	//mCell1 = static_cast<uint16_t>(combined * 382 / 10000);
 
-	low = i2cReadWithCrc(TS1_LO);
-	high = i2cReadWithCrc(TS1_HI);
-	combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
-	mTemp = 25 - ((combined * 382 - 1.2 * 384) / 0.0042);
+	//low = i2cReadWithCrc(VC2_LO_BYTE);
+	//high = i2cReadWithCrc(VC2_HI_BYTE);
+	//combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
+	//mCell2 = static_cast<uint16_t>(combined * 382 / 10000);
+
+	//low = i2cReadWithCrc(VC5_LO_BYTE);
+	//high = i2cReadWithCrc(VC5_HI_BYTE);
+	//combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
+	//mCell3 = static_cast<uint16_t>(combined * 382 / 10000);
+
+	//DLOG_DEBUG("Cell1=%dV Cell2=%dV Cell3=%dV", mCell1, mCell2, mCell3);
+
+	//uint8_t batPercentEstimate = getPercentEstimateFromVoltage();
+	//if (batPercentEstimate == 0) mState = DEAD;
+	//else if (batPercentEstimate <= 5) mState = CRITICAL;
+	//else if (batPercentEstimate <= 15) mState = WARNING;
+	//else mState = READY;
+
+	//low = i2cReadWithCrc(TS1_LO);
+	//high = i2cReadWithCrc(TS1_HI);
+	//combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
+	//mTemp = 25 - ((combined * 382 - 1.2 * 384) / 0.0042);
 	return;
 }
 

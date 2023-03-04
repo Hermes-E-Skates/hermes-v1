@@ -120,7 +120,7 @@ void HermesController::changeState(State_t state)
 	case MOTOR_OFF:
 		mMotorController.enableMotor();
 		mMotorController.motorOff();
-		digitalWrite(MOT_EN_LED, LOW);
+		analogWrite(MOT_EN_LED, 120);
 		digitalWrite(CHG_LED, LOW);
 		break;
 

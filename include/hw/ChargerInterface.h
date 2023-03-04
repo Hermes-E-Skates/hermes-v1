@@ -39,12 +39,15 @@ private:
 	bool configureBq25713(void) const;
 	void onWdogTimerExpire(uint32_t userData);
 	void onFaultStatusTimerExpire(uint32_t userData);
+	void onCheckInputSourceTimer(uint32_t userData);
 
 	const uint8_t BQ25713_I2C_ADDR = 0x6B;
+	uint8_t mInputSourceTimeouts = 0;
 	bool mCharging = false;
 	ChargeSpeed_t mChargeSpeed;
 	core::GenericTimer<ChargerInterface> mWatchdogTimer;
 	core::GenericTimer<ChargerInterface> mFaultStatusTimer;
+	core::GenericTimer<ChargerInterface> mCheckInputSourceTimer;
 };
 
 }

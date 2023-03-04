@@ -32,17 +32,17 @@ BluetoothInterface::BluetoothInterface()
 
 bool BluetoothInterface::init()
 {
-	Serial3.begin(BAUD_9600);
+	Serial2.begin(BAUD_9600);
 	return true;
 }
 
 void BluetoothInterface::loop()
 {
-	int16_t bytesAvail = Serial3.available();
+	int16_t bytesAvail = Serial2.available();
 
 	if (bytesAvail) {
 		uint8_t* buffer = new uint8_t[bytesAvail];
-		int16_t bytesRead = Serial3.readBytes(buffer, bytesAvail);
+		int16_t bytesRead = Serial2.readBytes(buffer, bytesAvail);
 
 		if (bytesRead == bytesAvail) {
 			const BluetoothCommand* cmd = parseCommand(buffer, bytesRead);
@@ -168,7 +168,7 @@ void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 				BluetoothResponse* resp = it->handleCommand(cmd);
 
 				if (resp != nullptr) {
-					Serial3.write(resp->encode(), resp->getSize());
+					Serial2.write(resp->encode(), resp->getSize());
 					delete resp;
 				} else {
 					DLOG_WARNING("Response from handler is null.");
@@ -226,7 +226,7 @@ bool BluetoothInterface::isConnected(void) const
 bool BluetoothInterface::sendATCommand(const std::string& AT) const
 {
 	if (!isConnected()) {
-		Serial3.write(AT.c_str(), AT.size());
+		Serial2.write(AT.c_str(), AT.size());
 		return true;
 	} else {
 		DLOG_WARNING("Cannot send AT commands while connection is established.")

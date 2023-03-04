@@ -106,7 +106,9 @@ void UsbController::onStatusTimerExpire(uint32_t userData)
 	if (isI2cAlive()) {
 		bool valid = I2cInterface::getInstance()->i2cRead(CYPD3177_I2C_ADDR, PD_STATUS, reinterpret_cast<uint8_t*>(&mPdStatus.data), sizeof(PdStatus_t));
 		
-		if (valid && mPdStatus.bits.CONTRACT_STATE && (digitalRead(USBC_FAULT_PIN) == LOW)) {
+		DLOG_INFO("CONTRACT=%d, POWER_ROLE=%d, PD_SPEC=0x%X", mPdStatus.bits.CONTRACT_STATE, mPdStatus.bits.POWER_ROLE, mPdStatus.bits.PARTNER_PD_SPEC);
+
+		if (valid && (digitalRead(USBC_FAULT_PIN) == LOW)) {
 			setState(CHARGE_READY);
 		} else {
 			setState(LOW_VOLTAGE);
@@ -117,11 +119,9 @@ void UsbController::onStatusTimerExpire(uint32_t userData)
 		DLOG_INFO("Fault pin is %s", digitalRead(USBC_FAULT_PIN) ? "HIGH" : "LOW");
 
 	} else {
+		DLOG_DEBUG("USBC i2c: no response");
 		setState(USB_OFF);
 	}
-
-
-	
 
 
 	//DLOG_INFO("BCR_CFG=0x%x DATA_ROLE=0x%x POWER_ROLE=0x%x CONTRACT_STATE=0x%x SINK_TX_RDY_STATUS=0x%x POLICY_ENGINE_STATE=0x%x PD_SPEC=0x%x PARTNER PD_SPEC=0x%x UNCHUNKED=0x%x"
