@@ -43,7 +43,7 @@ constexpr uint8_t CHARGER_INPUT_CURRENT = 0x2B;
 
 union ChargeOption0_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t LOW_PTM_RIPPLE : 1;
 		uint8_t PWM_FREQ : 1;
@@ -58,7 +58,7 @@ union ChargeOption0_high
 
 union ChargeOption0_low
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t CHRG_INHIBIT : 1;
 		uint8_t EN_IDPM : 1;
@@ -74,7 +74,7 @@ union ChargeOption0_low
 
 union ChargeOption1_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t PTM_PINSEL : 1;
 		uint8_t PSYS_RATIO : 1;
@@ -89,7 +89,7 @@ union ChargeOption1_high
 
 union ChargeOption1_low
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t AUTO_WAKEUP_EN : 1;
 		uint8_t EN_SHIP_DCHG : 1;
@@ -104,7 +104,7 @@ union ChargeOption1_low
 
 union ChargeOption2_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t PKPWR_TMAX : 2;
 		uint8_t PKPWR_RELAX_STAT : 1;
@@ -118,7 +118,7 @@ union ChargeOption2_high
 
 union ChargeOption2_low
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t BATOC_VTH : 1;
 		uint8_t EN_BATOC : 1;
@@ -134,7 +134,7 @@ union ChargeOption2_low
 
 union ChargeOption3_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t RSVD : 3;
 		uint8_t EN_ICO_MODE : 1;
@@ -148,7 +148,7 @@ union ChargeOption3_high
 
 union ChargeOption3_low
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t RSVD : 1;
 		uint8_t EN_CON_VAP : 1;
@@ -163,7 +163,7 @@ union ChargeOption3_low
 
 union ChargeCurrent_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t B2 : 1;
 		uint8_t B3 : 1;
@@ -177,8 +177,8 @@ union ChargeCurrent_high
 
 union ChargeCurrent_low
 {
-	struct
-	{
+	struct __attribute__((packed))
+	{ 
 		uint8_t RSVD : 6;
 		uint8_t B0_ : 1;
 		uint8_t B1_ : 1;
@@ -188,7 +188,7 @@ union ChargeCurrent_low
 
 union ChargerStatus_high
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t IN_OTG : 1;
 		uint8_t IN_PCHRG : 1;
@@ -204,7 +204,7 @@ union ChargerStatus_high
 
 union ChargerStatus_low
 {
-	struct
+	struct __attribute__((packed))
 	{
 		uint8_t FAULT_OTG_UVP : 1;
 		uint8_t FAULT_OTG_OVP : 1;

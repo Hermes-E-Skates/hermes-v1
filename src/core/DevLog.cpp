@@ -30,7 +30,7 @@ DevLog::DevLog()
 void DevLog::init()
 {
     level = DEBUG;
-    Serial.begin(BAUD_115200);
+    Serial3.begin(BAUD_115200);
 }
 
 // ---------------------------------------------------------------
@@ -47,7 +47,7 @@ int DevLog::print(const char* fmt, ...)
     va_start(args, fmt);
     int return_status = vsnprintf(buff, sizeof(buff), fmt, args);
     va_end(args);
-    Serial.print(buff);
+    Serial3.print(buff);
     return return_status;
 }
 
