@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------
 
 
-
+#include <Servo.h>
 #include <Wire.h>
 #include <ArduinoSTL.h>
 #include "include/core/EventLoop.h"

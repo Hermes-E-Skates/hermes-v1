@@ -26,6 +26,7 @@ BluetoothInterface::BluetoothInterface()
 	: BaseApp()
 	, mHeartbeatHandler(this, &BluetoothInterface::handleHeartbeat, HEARTBEAT)
 	, mHeartbeatTimeoutTimer(this, &BluetoothInterface::onHeartbeatTimerExpire)
+	, mTestTimer(this, &BluetoothInterface::onTestTimerTimeout)
 {
 	return;
 }
@@ -33,10 +34,24 @@ BluetoothInterface::BluetoothInterface()
 bool BluetoothInterface::init()
 {
 	Serial2.begin(BAUD_9600);
+	registerSerialHandler(&mHeartbeatHandler);
+	registerTimer(&mHeartbeatTimeoutTimer);
+	registerTimer(&mTestTimer);
+	mTestTimer.start(25, PERIODIC);
 	return true;
 }
 
 void BluetoothInterface::loop()
+{
+
+}
+
+void BluetoothInterface::onCriticalFault(const core::CriticalFault& criticalFault)
+{
+	return;
+}
+
+void BluetoothInterface::checkSerialLoop(void)
 {
 	int16_t bytesAvail = Serial2.available();
 
@@ -55,11 +70,6 @@ void BluetoothInterface::loop()
 	return;
 }
 
-void BluetoothInterface::onCriticalFault(const core::CriticalFault& criticalFault)
-{
-	return;
-}
-
 const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, uint8_t len)
 {
 	BluetoothCommand* cmd = nullptr;
@@ -67,24 +77,28 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 	do {
 		constexpr uint8_t MIN_CMD_SIZE = 3;
 		if (len < MIN_CMD_SIZE) {
+			//Serial2.write("Here 1");
 			// Not enough bytes to make a cmd
 			break;
 		}
 
 		uint8_t stxBytePos = bt::findByte(STX, buffer, len);
 		if (stxBytePos == NOT_FOUND || stxBytePos + 2 >= len) {
+			//Serial2.write("Here 2");
 			// We NEED the STX, and 2 more bytes after it.
 			break;
 		}
 
 		uint8_t cmdIdByte = buffer[stxBytePos + 1];
 		if (cmdIdByte <= UNKNOWN_CMD || cmdIdByte >= CMD_ID_END) {
+			//Serial2.write("Here 3");
 			// CMD ID must be valid
 			break;
 		}
 
 		uint8_t dataLen = buffer[stxBytePos + 2];
 		if (stxBytePos + 2 + dataLen >= len) {
+			//Serial2.write("Here 4");
 			// STX + CMD ID + SIZE + DATA is too large, not enough bytes received
 			break;
 		}
@@ -92,7 +106,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		const uint8_t* data = nullptr;
 
 		if (dataLen > 0) {
-			data = buffer + stxBytePos + 2;
+			data = buffer + stxBytePos + 3;
 		}
 
 		CmdId_t cmdId = static_cast<CmdId_t>(cmdIdByte);
@@ -161,14 +175,18 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 
 void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 {
+	//Serial2.write("handle cmd");
 	if (cmd != nullptr && cmd->valid()) {
 		for (auto it : mHandlers) {
 
 			if (it->getCmdId() == cmd->getCmdId()) {
+
+				//Serial2.write("handle cmd 2");
 				BluetoothResponse* resp = it->handleCommand(cmd);
 
 				if (resp != nullptr) {
-					Serial2.write(resp->encode(), resp->getSize());
+					const uint8_t* encodedResp = resp->encode();
+					Serial2.write(encodedResp, resp->getSize());
 					delete resp;
 				} else {
 					DLOG_WARNING("Response from handler is null.");
@@ -187,6 +205,11 @@ void BluetoothInterface::onHeartbeatTimerExpire(uint32_t userdata)
 	}
 	mConnected = false;
 	return;
+}
+
+void BluetoothInterface::onTestTimerTimeout(uint32_t userdata)
+{
+	checkSerialLoop();
 }
 
 BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)

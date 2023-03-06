@@ -59,6 +59,7 @@ public:
 private:
 	Identifier_t mIdentifier = UNKNOWN_ID;
 	Control_t mControl = OFF;
+	int mTestState = 0;
 
 	bt::BluetoothInterface mBluetoothInterface;
 	hw::BatteryInterface mBatteryInterface;

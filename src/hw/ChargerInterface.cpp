@@ -87,7 +87,7 @@ void ChargerInterface::setChargeSpeed(ChargeSpeed_t chargeSpeed)
 
 uint8_t ChargerInterface::getInputCurrent(void) const
 {
-	uint8_t inputCurrent = 0;
+	uint8_t inputCurrent = 1;
 	if (!I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGER_INPUT_CURRENT, &inputCurrent, 1)) {
 		DLOG_WARNING("I2C Error.");
 	}
@@ -186,10 +186,14 @@ bool ChargerInterface::configureBq25713(void) const
 	charge0high.bit.EN_OOA = 1;
 	charge0high.bit.OTG_ON_CHRGOK = 0;
 	charge0high.bit.IDPM_AUTO_DISABLE = 0;
-	charge0high.bit.WDTMR_ADJ = 0x00;
+	charge0high.bit.WDTMR_ADJ = 0b10;
 	charge0high.bit.EN_LWPWR = 0;
 	valid &= I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_0_HIGH, &charge0high.byte, 1);
-	DLOG_INFO("Charge0 write: %s", valid ? "SUCCESS" : "FAIL");
+	
+	I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGE_OPTION_0_LOW, &charge0low.byte, 1);
+	I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, CHARGE_OPTION_0_HIGH, &charge0high.byte, 1);
+	DLOG_INFO("Charge0 low=0b%d%d%d%d%d%d%d%d", charge0low.bit.CHRG_INHIBIT, charge0low.bit.EN_IDPM, charge0low.bit.EN_LDO, charge0low.bit.IBAT_GAIN, charge0low.bit.IADPT_GAIN, charge0low.bit.EN_LEARN, charge0low.bit.SYS_SHORT_DISABLE, charge0low.bit.RSVD);
+	DLOG_INFO("Charge0 high=0b%d%d%d%d%d%d%d%d", charge0high.bit.LOW_PTM_RIPPLE, charge0high.bit.PWM_FREQ, charge0high.bit.EN_OOA, charge0high.bit.OTG_ON_CHRGOK, charge0high.bit.IDPM_AUTO_DISABLE, (charge0high.bit.WDTMR_ADJ & 0b10) >> 1, charge0high.bit.WDTMR_ADJ & 0b01, charge0high.bit.EN_LWPWR);
 
 	ChargeOption1_low charge1low;
 	charge1low.bit.CMP_REF = 0;
@@ -204,7 +208,7 @@ bool ChargerInterface::configureBq25713(void) const
 	ChargeOption1_high charge1high;
 	charge1high.bit.EN_IBAT = 0;
 	charge1high.bit.EN_PROCHOT_LPWR = 0b00;
-	charge1high.bit.EN_PSYS = 1;
+	charge1high.bit.EN_PSYS = 0;
 	charge1high.bit.RSNS_RAC = 0;
 	charge1high.bit.RSNS_RSR = 0;
 	charge1high.bit.PSYS_RATIO = 1;
@@ -221,7 +225,7 @@ bool ChargerInterface::configureBq25713(void) const
 	charge2low.bit.ACOC_VTH = 1;
 	charge2low.bit.EN_BATOC = 1;
 	charge2low.bit.BATOC_VTH = 1;
-	I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_2_LOW, &charge2low.byte, 1);
+	valid = I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_2_LOW, &charge2low.byte, 1);
 
 	ChargeOption2_high charge2high;
 	charge2high.bit.PKPWR_TOVLD_DEG = 0b00; 
@@ -230,7 +234,9 @@ bool ChargerInterface::configureBq25713(void) const
 	charge2high.bit.PKPWR_OVLD_STAT = 0;
 	charge2high.bit.PKPWR_RELAX_STAT = 0;
 	charge2high.bit.PKPWR_TMAX = 0b10;
-	I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_2_HIGH, &charge2high.byte, 1);
+	valid &= I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_2_HIGH, &charge2high.byte, 1);
+	DLOG_INFO("Charge2 write: %s", valid ? "SUCCESS" : "FAIL");
+
 
 	ChargeOption3_low charge3low;
 	charge3low.bit.EN_CON_VAP = 1;
@@ -239,7 +245,7 @@ bool ChargerInterface::configureBq25713(void) const
 	charge3low.bit.OTG_RANGE_LOW = 0;
 	charge3low.bit.BATFETOFF_HIZ = 0;
 	charge3low.bit.PSYS_OTG_IDCHG = 0;
-	I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_LOW, &charge3low.byte, 1);
+	valid = I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_LOW, &charge3low.byte, 1);
 
 	ChargeOption3_high charge3high;
 	charge3high.bit.EN_HIZ = 0;
@@ -247,7 +253,17 @@ bool ChargerInterface::configureBq25713(void) const
 	charge3high.bit.RESET_VINDPM = 0;
 	charge3high.bit.EN_OTG = 0;
 	charge3high.bit.EN_ICO_MODE = 0;
-	I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_HIGH, &charge3high.byte, 1);
+	valid &= I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_HIGH, &charge3high.byte, 1);
+	DLOG_INFO("Charge3 write: %s", valid ? "SUCCESS" : "FAIL");
+
+	uint8_t low;
+	uint8_t high;
+	valid = I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, MAX_CHARGE_VOLTAGE_LOW, &low, 1);
+	valid &= I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, MAX_CHARGE_VOLTAGE_HIGH, &high, 1);
+
+	uint16_t combined = low | (high << 8);
+	combined = combined >> 3;
+	DLOG_INFO("Target voltage is (%s): %d mV", valid ? "SUCCESS" : "FAIL", combined * 64);
 }
 
 void ChargerInterface::onFaultStatusTimerExpire(uint32_t chargeSpeed)
@@ -257,6 +273,9 @@ void ChargerInterface::onFaultStatusTimerExpire(uint32_t chargeSpeed)
 
 	uint8_t current = getInputCurrent();
 	DLOG_DEBUG("Charge Input Current=%d", current);
+
+	uint8_t voltage = getInputVoltage();
+	DLOG_DEBUG("Charge Input Voltage=%d", voltage);
 }
 
 void ChargerInterface::onCheckInputSourceTimer(uint32_t userData)
@@ -290,12 +309,17 @@ void ChargerInterface::onWdogTimerExpire(uint32_t chargeSpeed)
 	ChargeCurrent_high high;
 	high.byte = (chargeSpeed >> 3) & 0b00011111;
 
-	bool valid = I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_LOW, &low.byte, 1);
-	valid &= I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_OPTION_3_HIGH, &high.byte, 1);
+	bool valid = I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_CURRENT_LOW, &low.byte, 1);
+	valid &= I2cInterface::getInstance()->i2cWrite(BQ25713_I2C_ADDR, CHARGE_CURRENT_HIGH, &high.byte, 1);
 	if (!valid) {
 		DLOG_WARNING("Watchdog timer failed to write the current.");
 	} else {
-		DLOG_DEBUG("Watchdog timer");
+		DLOG_DEBUG("current = 0x%X", low.byte | (high.byte) << 8);
+
+		uint8_t low1;
+		valid = I2cInterface::getInstance()->i2cRead(BQ25713_I2C_ADDR, (uint8_t)0x25, &low1, 1);
+		//uint8_t current = combined >> 6;
+		DLOG_DEBUG("reading current setting (%s): %d mA", valid ? "GOOD" : "FAIL", low1 * 50);
 	}
 }
 

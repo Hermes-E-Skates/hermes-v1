@@ -23,6 +23,7 @@ class SetThrottleCmd : public BluetoothCommand
 public:
     SetThrottleCmd(void);
     float getPercentage(void) const;
+    uint8_t getValue(void) const;
 
 private:
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;

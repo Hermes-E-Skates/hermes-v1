@@ -40,6 +40,7 @@ public:
 	virtual bool init(void) override;
 	virtual void loop(void) override;
 	virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
+	void checkSerialLoop(void);
 	bool registerSerialHandler(BaseBluetoothHandler* handler);
 	bool isConnected(void) const;
 	bool sendATCommand(const std::string& AT) const;
@@ -48,6 +49,7 @@ private:
 	const BluetoothCommand* parseCommand(uint8_t* const buffer, uint8_t len);
 	void handleNewMessage(const BluetoothCommand* cmd);
 	void onHeartbeatTimerExpire(uint32_t userdata);
+	void onTestTimerTimeout(uint32_t userdata);
 	BluetoothResponse* handleHeartbeat(const HeartbeatCmd* cmd);
 
 	const uint16_t HEARTBEAT_TIMEOUT = 1100;
@@ -55,6 +57,7 @@ private:
 	std::vector<BaseBluetoothHandler*> mHandlers;
 	GenericBluetoothHandler<BluetoothInterface, HeartbeatCmd> mHeartbeatHandler;
 	core::GenericTimer<BluetoothInterface> mHeartbeatTimeoutTimer;
+	core::GenericTimer<BluetoothInterface> mTestTimer;
 };
 
 }

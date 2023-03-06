@@ -18,15 +18,21 @@ SetThrottleCmd::SetThrottleCmd(void)
 	return;
 }
 
+
 float SetThrottleCmd::getPercentage(void) const
 {
 	return mThrottle / 255.0f * 100;
 }
 
+uint8_t SetThrottleCmd::getValue(void) const
+{
+	return mThrottle;
+}
+
 bool SetThrottleCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
 	if (len == 1) {
-		mThrottle = *bytes;
+		mThrottle = bytes[0];
 		return true;
 	} else {
 		return false;

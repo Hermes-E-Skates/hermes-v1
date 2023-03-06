@@ -120,7 +120,7 @@ void HermesController::changeState(State_t state)
 	case MOTOR_OFF:
 		mMotorController.enableMotor();
 		mMotorController.motorOff();
-		analogWrite(MOT_EN_LED, 120);
+		digitalWrite(MOT_EN_LED, HIGH);
 		digitalWrite(CHG_LED, LOW);
 		break;
 
@@ -128,7 +128,7 @@ void HermesController::changeState(State_t state)
 		mMotorController.enableMotor();
 		mMotorController.motorOn();
 		digitalWrite(MOT_EN_LED, HIGH);
-		digitalWrite(CHG_LED, LOW);
+		digitalWrite(CHG_LED, HIGH);
 		mChargerInterface.stopCharging();
 		break;
 
@@ -143,7 +143,7 @@ void HermesController::changeState(State_t state)
 		mMotorController.disableMotor();
 		mMotorController.motorOff();
 		digitalWrite(MOT_EN_LED, LOW);
-		digitalWrite(CHG_LED, HIGH);
+		//digitalWrite(CHG_LED, HIGH);
 		break;
 
 	default:
@@ -281,7 +281,7 @@ bt::BluetoothResponse* HermesController::handleSetThrottleCmd(const bt::SetThrot
 	if (cmd != nullptr && cmd->valid()) {
 		
 		if (mControl == BLUETOOTH) {
-			mMotorController.setThrottleInput(cmd->getPercentage());
+			mMotorController.setThrottleInput(cmd->getValue());
 			resp = new bt::SetThrottleResp(true);
 		} else {
 			resp = new bt::SetThrottleResp(false);
@@ -364,6 +364,7 @@ void HermesController::handleChargeRdyMsg(const messages::ChargeRdyMsg* msg)
 {
 	if (msg->isReadyToCharge()) {
 		changeState(CHARGING);
+		mChargerInterface.setChargeSpeed(ChargeSpeed_t::CURRENT_5A);
 		mChargerInterface.startCharging();
 	} else {
 		changeState(MOTOR_DISABLED);
@@ -382,11 +383,44 @@ void HermesController::handleBluetoothStatusMsg(const messages::BluetoothStatusM
 void HermesController::onButtonPress(Pin_t pin, int16_t state)
 {
 	DLOG_INFO("Button state=%s", state == LOW ? "DOWN" : "UP");
+	//if (state == LOW) {
+	//	if (mState == MOTOR_OFF) {
+	//		changeState(MOTOR_DISABLED);
+	//	} else if (mState == MOTOR_DISABLED) {
+	//		changeState(MOTOR_OFF);
+	//	}
+	//}
+
 	if (state == LOW) {
-		if (mState == READY) {
+		mTestState++;
+		if (mTestState >= 6) {
+			mTestState = 0;
+		}
+
+		switch (mTestState) {
+		case 0:
 			changeState(MOTOR_DISABLED);
-		} else if (mState == MOTOR_DISABLED) {
+			break;
+
+		case 1:
+			changeState(MOTOR_OFF);
+			break;
+
+		case 2:
 			changeState(READY);
+			break;
+
+		case 3:
+			mMotorController.setThrottleInput(175);
+			break;
+
+		case 4:
+			mMotorController.setThrottleInput(255);
+			break;
+
+		case 5:
+			mMotorController.setThrottleInput(0);
+			break;
 		}
 	}
 }

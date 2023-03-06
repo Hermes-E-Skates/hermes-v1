@@ -40,6 +40,8 @@ constexpr uint8_t CHARGER_STATUS_HIGH = 0x21;
 constexpr uint8_t CHARGER_STATUS_LOW = 0x20;
 constexpr uint8_t CHARGER_INPUT_VOLTAGE = 0x27;
 constexpr uint8_t CHARGER_INPUT_CURRENT = 0x2B;
+constexpr uint8_t MAX_CHARGE_VOLTAGE_HIGH = 0x05;
+constexpr uint8_t MAX_CHARGE_VOLTAGE_LOW = 0x04;
 
 union ChargeOption0_high
 {
