@@ -93,8 +93,8 @@ enum Pin_t : int8_t
     TX_PIN = 1,
     ESC_PWM_PIN = 46,
     B1_PIN = 9,
-    GPIO_1_PIN = 44,
-    GPIO_2_PIN = 43,
+    GPIO_1_PIN = 44, // identifier
+    GPIO_2_PIN = 43, // load 1 sck
     RX_BT_PIN = 14,
     TX_BT_PIN = 15,
     BAT_ALERT_PIN = 5,
@@ -103,6 +103,9 @@ enum Pin_t : int8_t
     USBC_FLIP_PIN = 33,
     USBC_FAULT_PIN = 34,
     I2C_EN_PIN = 30,
+    SCK_PIN = 52, // load 2 sck
+    MOSI_PIN = 51, // load 1 dt
+    MISO_PIN = 50, // load 2 dt
     CHG_LED = A1,
     MOT_EN_LED = A3,
     USER_LED = A4,

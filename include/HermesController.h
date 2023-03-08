@@ -16,6 +16,7 @@
 #include "hw/MotorInterface.h"
 #include "hw/ImuInterface.h"
 #include "hw/UsbController.h"
+#include "hw/LoadSensor.h"
 #include "cmds/GenericBluetoothHandler.h"
 #include "cmds/BluetoothResponse.h"
 #include "cmds/BluetoothCommand.h"
@@ -66,6 +67,7 @@ private:
 	hw::MotorInterface mMotorController;
 	hw::ImuInterface mImuInterface;
 	hw::UsbController mUsbController;
+	hw::LoadSensor mLoadSensor;
 
 	core::GenericObserver<HermesController> mButtonPressPinWatcher;
 	core::MsgHandler<HermesController, messages::ChargeRdyMsg> mChargeRdyMsgHandler;
