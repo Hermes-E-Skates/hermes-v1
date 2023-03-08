@@ -14,6 +14,7 @@ namespace hw {
 
 MotorInterface::MotorInterface(void)
 	: mWheelSpeedTimer(this, &MotorInterface::onTimerExpire)
+	, mMotorEnTimer(this, &MotorInterface::motorReadyTimer)
 {
 	return;
 }
@@ -21,38 +22,46 @@ MotorInterface::MotorInterface(void)
 bool MotorInterface::init(void)
 {
 	registerTimer(&mWheelSpeedTimer);
+	registerTimer(&mMotorEnTimer);
+	ESC.attach(ESC_PWM_PIN, 1000, 2000);
 	return false;
 }
 
 void MotorInterface::loop(void)
 {
-	if (mMotorEnabled) {
-		if (mMotorOn) {
-			// Algorithm needed
+	//if (mMotorEnabled) {
+	//	if (mMotorOn) {
+	//		// Algorithm needed
 
-			// 
+	//		// 
 
-			// 
+	//		// 
 
-			// Ratio of throttle to speed
-			float ratio = mPwmSignal / mThrottle;
+	//		// Ratio of throttle to speed
+	//		float ratio = mPwmSignal / mThrottle;
 
-			// Check the time
-			uint32_t time = millis();
-			if (time - mLastTimeUpdated > mIntervalOfIncrease) {
-				mLastTimeUpdated = time;
-				if (mPwmSignal < __UINT8_MAX__) {
-					mPwmSignal++;
-				}
-			}
+	//		// Check the time
+	//		uint32_t time = millis();
+	//		if (time - mLastTimeUpdated > mIntervalOfIncrease) {
+	//			mLastTimeUpdated = time;
+	//			if (mPwmSignal < __UINT8_MAX__) {
+	//				mPwmSignal++;
+	//			}
+	//		}
 
-			// Write signal to motor
-			analogWrite(ESC_PWM_PIN, mPwmSignal);
-		} else {
+	//		// Write signal to motor
+	//		analogWrite(ESC_PWM_PIN, mPwmSignal);
+	//	} else {
 
-			// If motor is OFF write 0's
-			analogWrite(ESC_PWM_PIN, 0);
-		}
+	//		// If motor is OFF write 0's
+	//		analogWrite(ESC_PWM_PIN, 0);
+	//	}
+	//}
+
+	if (mMotorOn && mMotorPrimed) {
+		ESC.write(mThrottle);
+	} else {
+		ESC.write(0);
 	}
 }
 
@@ -61,9 +70,9 @@ void MotorInterface::onCriticalFault(const core::CriticalFault& criticalFault)
 	return;
 }
 
-void MotorInterface::setThrottleInput(float throttle)
+void MotorInterface::setThrottleInput(uint8_t throttle)
 {
-	mThrottle = throttle;
+	mThrottle = map(throttle, 0, 255, 0, 180);
 	return;
 }
 
@@ -107,16 +116,16 @@ MaxAccel_t MotorInterface::getMaxAccel(void) const
 void MotorInterface::motorOn(void)
 {
 	mMotorOn = true;
-	if (!mWheelSpeedTimer.isEnabled()) {
-		mWheelSpeedTimer.start(100, PERIODIC);
-	}
+	//if (!mWheelSpeedTimer.isEnabled()) {
+	//	mWheelSpeedTimer.start(100, PERIODIC);
+	//}
 	return;
 }
 
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
-	mWheelSpeedTimer.stop();
+	//mWheelSpeedTimer.stop();
 	return;
 }
 
@@ -124,12 +133,14 @@ void MotorInterface::enableMotor(void)
 {
 	mMotorEnabled = true;
 	digitalWrite(Pin_t::MOT_EN, HIGH);
+	mMotorEnTimer.start(7000, ONESHOT, 0);
 	return;
 }
 
 void MotorInterface::disableMotor(void)
 {
 	mMotorEnabled = false;
+	mMotorPrimed = false;
 	digitalWrite(Pin_t::MOT_EN, LOW);
 	return;
 }
@@ -141,10 +152,21 @@ uint8_t MotorInterface::getSpeedKmh(void)
 
 void MotorInterface::onTimerExpire(uint32_t userdata)
 {
-	uint16_t h1 = analogRead(MOTOR_SENSE_H1);
-	uint16_t h2 = analogRead(MOTOR_SENSE_H2);
-	uint16_t h3 = analogRead(MOTOR_SENSE_H3);
+	//uint16_t h1 = analogRead(MOTOR_SENSE_H1);
+	//uint16_t h2 = analogRead(MOTOR_SENSE_H2);
+	//uint16_t h3 = analogRead(MOTOR_SENSE_H3);
 	return;
+}
+
+void MotorInterface::motorReadyTimer(uint32_t userdata)
+{
+	//if (userdata == 0) {
+	//	mThrottle = 0;
+	//	mMotorEnTimer.start(5000, ONESHOT, 1);
+	//} else if (userdata == 1) {
+	//	mThrottle = 0;
+	//}
+	mMotorPrimed = true;
 }
 
 }

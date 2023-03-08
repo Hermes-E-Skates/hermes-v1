@@ -28,10 +28,11 @@ const uint8_t* BluetoothResponse::encode(void)
 {
 	mEncodedResponse.push_back(STX);
 	mEncodedResponse.push_back(mCmdId);
-	encodeData(mEncodedResponse);
 	mEncodedResponse.push_back(mAck ? ACK : NAK);
-	mEncodedResponse.push_back(EOT);
-	return &mEncodedResponse[0];
+	mEncodedResponse.push_back(0); // Placeholder
+	encodeData(mEncodedResponse);
+	mEncodedResponse[3] = mEncodedResponse.size() - 4;
+	return mEncodedResponse.data();
 }
 
 CmdId_t BluetoothResponse::getCmdId(void) const

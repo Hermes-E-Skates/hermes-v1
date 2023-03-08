@@ -30,9 +30,23 @@ bool SetMotorEnableCmd::isMotorOn(void) const
 
 bool SetMotorEnableCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
+	// 00 = MOTOR DISABLE, MOTOR OFF
+	// 01 = MOTOR ENABLE, MOTOR OFF
+	// 11 = MOTOR ENABLE, MOTOR ON
+	// 10 = INVALID STATE
+
+	Serial.write(99);
 	if (len == 1) {
-		mMotorEnable = (*bytes) & 0b0001;
-		mMotorOn = (*bytes) & 0b0010;
+		if ((*bytes) == 1) {
+			mMotorEnable = true;
+			mMotorOn = false;
+		} else if ((*bytes) == 3) {
+			mMotorEnable == true;
+			mMotorOn == true;
+		} else {
+			mMotorEnable = false;
+			mMotorOn = false;
+		}
 		return true;
 	} else {
 		return false;
