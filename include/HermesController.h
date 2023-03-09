@@ -71,6 +71,7 @@ private:
 	hw::LoadSensor mLoadSensor;
 
 	core::GenericObserver<HermesController> mButtonPressPinWatcher;
+	core::GenericTimer<HermesController> mCheckStateTimer;
 	core::MsgHandler<HermesController, messages::ChargeRdyMsg> mChargeRdyMsgHandler;
 	core::MsgHandler<HermesController, messages::BluetoothStatusMsg> mBluetoothStatusMsg;
 	bt::GenericBluetoothHandler<HermesController, bt::GetInfoCmd> mGetInfoCmdHandler;
@@ -98,6 +99,7 @@ private:
 	void handleChargeRdyMsg(const messages::ChargeRdyMsg* msg);
 	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);
+	void onTimerExpire(void);
 };
 
 }

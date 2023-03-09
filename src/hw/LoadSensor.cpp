@@ -75,5 +75,10 @@ void LoadSensor::onCriticalFault(const core::CriticalFault& criticalFault)
 	return;
 }
 
+LeanState_t LoadSensor::getLeanState(void)
+{
+    return mLeanState;
+}
+
 }
 }
