@@ -18,11 +18,11 @@ namespace hw {
 
 class MotorInterface : core::BaseApp {
 public:
-	MotorInterface(void);
+    MotorInterface(void);
 
-	virtual bool init(void) override;
-	virtual void loop(void) override;
-	virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
+    virtual bool init(void) override;
+    virtual void loop(void) override;
+    virtual void onCriticalFault(const core::CriticalFault& criticalFault) override;
 
 	void setThrottleInput(uint8_t throttle);
 	void setMaxSpeed(MaxSpeed_t maxSpeed);
@@ -37,16 +37,21 @@ public:
 
 private:
 	Servo ESC;
-	MaxSpeed_t mMaxSpeed = UNLIMITED;
-	MaxAccel_t mMaxAccel = NORMAL;
-	bool mMotorOn = false;
-	bool mMotorEnabled = false;
+    MaxSpeed_t mMaxSpeed = UNLIMITED;
+    MaxAccel_t mMaxAccel = NORMAL;
+    bool mMotorOn = false;
+    bool mMotorEnabled = false;
 	bool mMotorPrimed = false;
-	uint8_t mPwmSignal = 0;
-	uint8_t mThrottle = 0;
-	uint32_t mLastTimeUpdated = 0;
-	uint16_t mIntervalOfIncrease = 10;
-	core::GenericTimer<MotorInterface> mWheelSpeedTimer;
+    uint8_t mPwmSignal = 0;
+    uint8_t mThrottle = 0;
+    uint32_t mLastTimeUpdated = 0;
+    uint16_t mIntervalOfIncrease = 10;
+    float mKp = 0.1; // Proportional gain for PID controller
+    float mKi = 0.01; // Integral gain for PID controller
+    float mKd = 0.01; // Derivative gain for PID controller
+    float mIntegral = 0; // Integral term for PID controller
+    float mPreviousError = 0; // Error from previous loop iteration for PID controller
+    core::GenericTimer<MotorInterface> mWheelSpeedTimer;
 	core::GenericTimer<MotorInterface> mMotorEnTimer;
 
 	void onTimerExpire(uint32_t userdata);
