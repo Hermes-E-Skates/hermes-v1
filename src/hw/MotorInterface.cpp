@@ -7,6 +7,7 @@
 
 
 #include "../../include/hw/MotorInterface.h"
+#include "../../include/hw/LoadSensor.h"
 
 
 namespace hermes {
