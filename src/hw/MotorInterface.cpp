@@ -7,13 +7,15 @@
 
 
 #include "../../include/hw/MotorInterface.h"
+#include "../../include/hw/LoadSensor.h"
+#include "../../include/hw/LoadSensor.h"
 
 
 namespace hermes {
 namespace hw {
 
 MotorInterface::MotorInterface(void)
-	: mWheelSpeedTimer(this, &MotorInterface::onTimerExpire)
+	: mThrottleUpdateTimer(this, &MotorInterface::onTimerExpire)
 	, mMotorEnTimer(this, &MotorInterface::motorReadyTimer)
 {
 	return;
@@ -21,7 +23,7 @@ MotorInterface::MotorInterface(void)
 
 bool MotorInterface::init(void)
 {
-	registerTimer(&mWheelSpeedTimer);
+	registerTimer(&mThrottleUpdateTimer);
 	registerTimer(&mMotorEnTimer);
 	ESC.attach(ESC_PWM_PIN, 1000, 2000);
 	return false;
@@ -29,37 +31,8 @@ bool MotorInterface::init(void)
 
 void MotorInterface::loop(void)
 {
-	//if (mMotorEnabled) {
-	//	if (mMotorOn) {
-	//		// Algorithm needed
-
-	//		// 
-
-	//		// 
-
-	//		// Ratio of throttle to speed
-	//		float ratio = mPwmSignal / mThrottle;
-
-	//		// Check the time
-	//		uint32_t time = millis();
-	//		if (time - mLastTimeUpdated > mIntervalOfIncrease) {
-	//			mLastTimeUpdated = time;
-	//			if (mPwmSignal < __UINT8_MAX__) {
-	//				mPwmSignal++;
-	//			}
-	//		}
-
-	//		// Write signal to motor
-	//		analogWrite(ESC_PWM_PIN, mPwmSignal);
-	//	} else {
-
-	//		// If motor is OFF write 0's
-	//		analogWrite(ESC_PWM_PIN, 0);
-	//	}
-	//}
-
 	if (mMotorOn && mMotorPrimed) {
-		ESC.write(mThrottle);
+		ESC.write(mPwmSignal);
 	} else {
 		ESC.write(0);
 	}
@@ -116,16 +89,16 @@ MaxAccel_t MotorInterface::getMaxAccel(void) const
 void MotorInterface::motorOn(void)
 {
 	mMotorOn = true;
-	//if (!mWheelSpeedTimer.isEnabled()) {
-	//	mWheelSpeedTimer.start(100, PERIODIC);
-	//}
+	if (!mThrottleUpdateTimer.isEnabled()) {
+		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
+	}
 	return;
 }
 
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
-	//mWheelSpeedTimer.stop();
+	mThrottleUpdateTimer.stop();
 	return;
 }
 
@@ -152,20 +125,17 @@ uint8_t MotorInterface::getSpeedKmh(void)
 
 void MotorInterface::onTimerExpire(uint32_t userdata)
 {
-	//uint16_t h1 = analogRead(MOTOR_SENSE_H1);
-	//uint16_t h2 = analogRead(MOTOR_SENSE_H2);
-	//uint16_t h3 = analogRead(MOTOR_SENSE_H3);
+	if (mThrottle > mPwmSignal) {
+		mPwmSignal++;
+	} else if (mThrottle < mPwmSignal) {
+		mPwmSignal -= 10;
+	}
+
 	return;
 }
 
 void MotorInterface::motorReadyTimer(uint32_t userdata)
 {
-	//if (userdata == 0) {
-	//	mThrottle = 0;
-	//	mMotorEnTimer.start(5000, ONESHOT, 1);
-	//} else if (userdata == 1) {
-	//	mThrottle = 0;
-	//}
 	mMotorPrimed = true;
 }
 

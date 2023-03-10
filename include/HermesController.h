@@ -16,6 +16,7 @@
 #include "hw/MotorInterface.h"
 #include "hw/ImuInterface.h"
 #include "hw/UsbController.h"
+#include "hw/LoadSensor.h"
 #include "cmds/GenericBluetoothHandler.h"
 #include "cmds/BluetoothResponse.h"
 #include "cmds/BluetoothCommand.h"
@@ -30,9 +31,11 @@
 #include "cmds/SetThrottle.h"
 #include "cmds/SetMotorEnable.h"
 #include "core/CommonDefs.h"
+#include "core/GenericTimer.h"
 #include "core/MessageHandler.h"
 #include "messages/ChargeRdyMsg.h"
 #include "messages/BluetoothStatusMsg.h"
+
 
 
 namespace hermes {
@@ -67,8 +70,11 @@ private:
 	hw::MotorInterface mMotorController;
 	hw::ImuInterface mImuInterface;
 	hw::UsbController mUsbController;
+	hw::LoadSensor mLoadSensor;
 
 	core::GenericObserver<HermesController> mButtonPressPinWatcher;
+	core::GenericTimer<HermesController> mCheckStateTimer;
+	core::GenericTimer<HermesController> mNeutralLoadTimer;
 	core::MsgHandler<HermesController, messages::ChargeRdyMsg> mChargeRdyMsgHandler;
 	core::MsgHandler<HermesController, messages::BluetoothStatusMsg> mBluetoothStatusMsg;
 	bt::GenericBluetoothHandler<HermesController, bt::GetInfoCmd> mGetInfoCmdHandler;
@@ -96,6 +102,8 @@ private:
 	void handleChargeRdyMsg(const messages::ChargeRdyMsg* msg);
 	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);
+	void onTimerExpire(uint32_t userdata);
+	void onNeutralLoadTimerExpire(uint32_t userdata);
 };
 
 }
