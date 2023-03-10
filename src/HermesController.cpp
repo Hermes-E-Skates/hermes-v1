@@ -27,9 +27,9 @@ HermesController::HermesController(void)
 	, mSetModeCmdHandler(this, &HermesController::handleSetModeCmd, bt::SET_MODE)
 	, mSetMotorEnableCmdHandler(this, &HermesController::handleSetMotorEnCmd, bt::SET_MOTOR_EN)
 	, mButtonPressPinWatcher(this, &HermesController::onButtonPress, B1_PIN)
+	, mCheckStateTimer(this, &HermesController::onTimerExpire)
 	, mChargeRdyMsgHandler(this, &HermesController::handleChargeRdyMsg, CHARGE_RDY_MSG)
 	, mBluetoothStatusMsg(this, &HermesController::handleBluetoothStatusMsg, BLUETOOTH_STATUS_MSG)
-	, mCheckStateTimer(this, &HermesController::onTimerExpire)
 {
 	return;
 }
@@ -83,7 +83,7 @@ void HermesController::enterSleep(void)
 	BaseApp::sendMessage(&msg);
 
 	// Put core in sleep state
-	set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	// set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	return;
 }
 
@@ -430,14 +430,13 @@ void HermesController::onButtonPress(Pin_t pin, int16_t state)
 	}
 }
 
-void HermesController::onTimerExpire(void)
+void HermesController::onTimerExpire(uint32_t userdata)
 {
-	Control_t controlMode = getControlMode();
-	LeanState_t leanState = getLeanState();
+	hw::LoadSensor::LeanState_t leanState = mLoadSensor.getLeanState();
 
-	if (controlMode == LOAD_SENSOR) {
-		if (leanState == FORWARD) {
-			setThrottleInput(100);
+	if (mControl == LOAD_SENSOR) {
+		if (leanState == hw::LoadSensor::FORWARD) {
+			mMotorController.setThrottleInput(100);
 		}
 	}
 }

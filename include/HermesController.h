@@ -31,9 +31,11 @@
 #include "cmds/SetThrottle.h"
 #include "cmds/SetMotorEnable.h"
 #include "core/CommonDefs.h"
+#include "core/GenericTimer.h"
 #include "core/MessageHandler.h"
 #include "messages/ChargeRdyMsg.h"
 #include "messages/BluetoothStatusMsg.h"
+
 
 
 namespace hermes {
@@ -99,7 +101,7 @@ private:
 	void handleChargeRdyMsg(const messages::ChargeRdyMsg* msg);
 	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);
-	void onTimerExpire(void);
+	void onTimerExpire(uint32_t userdata);
 };
 
 }

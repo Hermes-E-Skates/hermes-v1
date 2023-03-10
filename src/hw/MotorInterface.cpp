@@ -14,7 +14,7 @@ namespace hermes {
 namespace hw {
 
 MotorInterface::MotorInterface(void)
-	: mWheelSpeedTimer(this, &MotorInterface::onTimerExpire)
+	: mThrottleUpdateTimer(this, &MotorInterface::onTimerExpire)
 	, mMotorEnTimer(this, &MotorInterface::motorReadyTimer)
 {
 	return;
@@ -22,7 +22,7 @@ MotorInterface::MotorInterface(void)
 
 bool MotorInterface::init(void)
 {
-	registerTimer(&mWheelSpeedTimer);
+	registerTimer(&mThrottleUpdateTimer);
 	registerTimer(&mMotorEnTimer);
 	ESC.attach(ESC_PWM_PIN, 1000, 2000);
 	return false;
@@ -117,16 +117,16 @@ MaxAccel_t MotorInterface::getMaxAccel(void) const
 void MotorInterface::motorOn(void)
 {
 	mMotorOn = true;
-	//if (!mWheelSpeedTimer.isEnabled()) {
-	//	mWheelSpeedTimer.start(100, PERIODIC);
-	//}
+	if (!mThrottleUpdateTimer.isEnabled()) {
+		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
+	}
 	return;
 }
 
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
-	//mWheelSpeedTimer.stop();
+	mThrottleUpdateTimer.stop();
 	return;
 }
 
@@ -153,9 +153,12 @@ uint8_t MotorInterface::getSpeedKmh(void)
 
 void MotorInterface::onTimerExpire(uint32_t userdata)
 {
-	//uint16_t h1 = analogRead(MOTOR_SENSE_H1);
-	//uint16_t h2 = analogRead(MOTOR_SENSE_H2);
-	//uint16_t h3 = analogRead(MOTOR_SENSE_H3);
+	if (mThrottle > mPwmSignal) {
+		mPwmSignal++;
+	} else if (mThrottle < mPwmSignal) {
+		mPwmSignal -= 10;
+	}
+
 	return;
 }
 
