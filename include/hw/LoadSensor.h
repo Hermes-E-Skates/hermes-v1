@@ -36,8 +36,8 @@ private:
     const float CALIBRATION_VALUE1 = 696.0;
     const float CALIBRATION_VALUE2 = 733.0;
 
-    HX711_ADC mLoadCell1; //HX711 1
-    HX711_ADC mLoadCell2; //HX711 2
+    HX711_ADC mLoadCellFront; //HX711 1
+    HX711_ADC mLoadCellBack; //HX711 2
 
     LeanState_t mLeanState = NEUTRAL;
 };

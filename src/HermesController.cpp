@@ -28,6 +28,7 @@ HermesController::HermesController(void)
 	, mSetMotorEnableCmdHandler(this, &HermesController::handleSetMotorEnCmd, bt::SET_MOTOR_EN)
 	, mButtonPressPinWatcher(this, &HermesController::onButtonPress, B1_PIN)
 	, mCheckStateTimer(this, &HermesController::onTimerExpire)
+	, mNeutralLoadTimer(this, &HermesController::onNeutralLoadTimerExpire)
 	, mChargeRdyMsgHandler(this, &HermesController::handleChargeRdyMsg, CHARGE_RDY_MSG)
 	, mBluetoothStatusMsg(this, &HermesController::handleBluetoothStatusMsg, BLUETOOTH_STATUS_MSG)
 {
@@ -53,6 +54,7 @@ bool HermesController::init(void)
 	registerMessageHandler(&mChargeRdyMsgHandler);
 	registerMessageHandler(&mBluetoothStatusMsg);
 	registerTimer(&mCheckStateTimer);
+	registerTimer(&mNeutralLoadTimer);
 
 	mButtonPressPinWatcher.enable();
 
@@ -441,9 +443,20 @@ void HermesController::onTimerExpire(uint32_t userdata)
 
 	if (mControl == LOAD_SENSOR) {
 		if (leanState == hw::LoadSensor::FORWARD) {
-			mMotorController.setThrottleInput(100);
+			mMotorController.setThrottleInput(180);
+			mNeutralLoadTimer.stop();
+		} else if (leanState == hw::LoadSensor::BACKWARD) {
+			mMotorController.setThrottleInput(0);
+			mNeutralLoadTimer.stop();
+		} else if (leanState == hw::LoadSensor::NEUTRAL) {
+			mNeutralLoadTimer.start(1000, ONESHOT);
 		}
 	}
+}
+
+void HermesController::onTimerExpire(uint32_t userdata)
+{
+	mMotorController.setThrottleInput(0);
 }
 
 }

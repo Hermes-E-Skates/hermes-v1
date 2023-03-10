@@ -74,6 +74,7 @@ private:
 
 	core::GenericObserver<HermesController> mButtonPressPinWatcher;
 	core::GenericTimer<HermesController> mCheckStateTimer;
+	core::GenericTimer<HermesController> mNeutralLoadTimer;
 	core::MsgHandler<HermesController, messages::ChargeRdyMsg> mChargeRdyMsgHandler;
 	core::MsgHandler<HermesController, messages::BluetoothStatusMsg> mBluetoothStatusMsg;
 	bt::GenericBluetoothHandler<HermesController, bt::GetInfoCmd> mGetInfoCmdHandler;
@@ -102,6 +103,7 @@ private:
 	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);
 	void onTimerExpire(uint32_t userdata);
+	void onNeutralLoadTimerExpire(uint32_t userdata);
 };
 
 }
