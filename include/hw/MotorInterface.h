@@ -53,12 +53,8 @@ private:
     float mKd = 0.01; // Derivative gain for PID controller
     float mIntegral = 0; // Integral term for PID controller
     float mPreviousError = 0; // Error from previous loop iteration for PID controller
-<<<<<<< HEAD
     core::GenericTimer<MotorInterface> mWheelSpeedTimer;
 	core::GenericTimer<MotorInterface> mMotorEnTimer;
-=======
-    unsigned long mLastTimeUpdated = 0; // Time (in milliseconds) when PWM signal was last updated for PID controller
->>>>>>> 2a92f1c (PID -> dampening)
 
 	void onTimerExpire(uint32_t userdata);
 	void motorReadyTimer(uint32_t userdata);
