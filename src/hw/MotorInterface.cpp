@@ -14,14 +14,14 @@ namespace hermes {
 namespace hw {
 
 MotorInterface::MotorInterface(void)
-	: mWheelSpeedTimer(this, &MotorInterface::onTimerExpire)
+	: mThrottleUpdateTimer(this, &MotorInterface::onTimerExpire)
 {
 	return;
 }
 
 bool MotorInterface::init(void)
 {
-	registerTimer(&mWheelSpeedTimer);
+	registerTimer(&mThrottleUpdateTimer);
 	return false;
 }
 
@@ -29,27 +29,28 @@ void MotorInterface::loop(void)
 {
     if (mMotorEnabled) {
         if (mMotorOn) {
-            // Calculate error between desired speed setpoint and current speed of the motor
-            float speed = (float)mPwmSignal / __UINT8_MAX__ * MAX_SPEED; // Convert PWM signal to speed (assuming linear relationship)
-            float error = mThrottle - speed;
+            // // Calculate error between desired speed setpoint and current speed of the motor
+            // float speed = (float)mPwmSignal / __UINT8_MAX__ * MAX_SPEED; // Convert PWM signal to speed (assuming linear relationship)
+            // float error = mThrottle - speed;
 
-            // Compute PID output
-            unsigned long current_time = millis();
-            float dt = (current_time - mLastTimeUpdated) / 1000.0; // Time elapsed since last loop iteration, in seconds
-            mIntegral += error * dt;
-            float derivative = (error - mPreviousError) / dt;
-            float output = mKp * error + mKi * mIntegral + mKd * derivative;
-            mPreviousError = error;
-            mLastTimeUpdated = current_time;
+            // // Compute PID output
+            // unsigned long current_time = millis();
+            // float dt = (current_time - mLastTimeUpdated) / 1000.0; // Time elapsed since last loop iteration, in seconds
+            // mIntegral += error * dt;
+            // float derivative = (error - mPreviousError) / dt;
+            // float output = mKp * error + mKi * mIntegral + mKd * derivative;
+            // mPreviousError = error;
+            // mLastTimeUpdated = current_time;
 
-            // Convert PID output to PWM signal (assuming linear relationship)
-            float throttle = output / MAX_SPEED * __UINT8_MAX__;
-            if (throttle > mThrottle) {
-                throttle = mThrottle; // Limit throttle to maximum value set by user
-            } else if (throttle < 0) {
-                throttle = 0; // Ensure throttle is positive
-            }
-            mPwmSignal = (uint8_t)throttle;
+            // // Convert PID output to PWM signal (assuming linear relationship)
+            // float throttle = output / MAX_SPEED * __UINT8_MAX__;
+            // if (throttle > mThrottle) {
+            //     throttle = mThrottle; // Limit throttle to maximum value set by user
+            // } else if (throttle < 0) {
+            //     throttle = 0; // Ensure throttle is positive
+            // }
+            // mPwmSignal = (uint8_t)throttle;
+
             analogWrite(ESC_PWM_PIN, mPwmSignal);
         } else {
             // If motor is OFF, write 0's
@@ -109,8 +110,8 @@ MaxAccel_t MotorInterface::getMaxAccel(void) const
 void MotorInterface::motorOn(void)
 {
 	mMotorOn = true;
-	if (!mWheelSpeedTimer.isEnabled()) {
-		mWheelSpeedTimer.start(100, PERIODIC);
+	if (!mThrottleUpdateTimer.isEnabled()) {
+		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
 	}
 	return;
 }
@@ -118,7 +119,7 @@ void MotorInterface::motorOn(void)
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
-	mWheelSpeedTimer.stop();
+	mThrottleUpdateTimer.stop();
 	return;
 }
 
@@ -143,9 +144,12 @@ uint8_t MotorInterface::getSpeedKmh(void)
 
 void MotorInterface::onTimerExpire(uint32_t userdata)
 {
-	uint16_t h1 = analogRead(MOTOR_SENSE_H1);
-	uint16_t h2 = analogRead(MOTOR_SENSE_H2);
-	uint16_t h3 = analogRead(MOTOR_SENSE_H3);
+	if (mThrottle > mPwmSignal) {
+		mPwmSignal++;
+	} else if (mThrottle < mPwmSignal) {
+		mPwmSignal -= 10;
+	}
+
 	return;
 }
 

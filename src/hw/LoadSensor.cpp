@@ -40,8 +40,8 @@ bool LoadSensor::init(void)
     if (mLoadCell2.getTareTimeoutFlag()) {
     DLOG_ERROR("Timeout, check MCU>HX711 no.2 wiring and pin designations")
     }
-    mLoadCell1.setCalFactor(calibrationValue_1); // user set calibration value (float)
-    mLoadCell2.setCalFactor(calibrationValue_2); // user set calibration value (float)
+    mLoadCell1.setCalFactor(CALIBRATION_VALUE1); // user set calibration value (float)
+    mLoadCell2.setCalFactor(CALIBRATION_VALUE2); // user set calibration value (float)
     DLOG_INFO("Startup is complete")
 }
 
@@ -75,7 +75,7 @@ void LoadSensor::onCriticalFault(const core::CriticalFault& criticalFault)
 	return;
 }
 
-LeanState_t LoadSensor::getLeanState(void)
+LoadSensor::LeanState_t LoadSensor::getLeanState(void)
 {
     return mLeanState;
 }

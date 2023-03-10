@@ -44,13 +44,14 @@ private:
     uint8_t mThrottle = 0;
     uint32_t mLastTimeUpdated = 0;
     uint16_t mIntervalOfIncrease = 10;
+    core::GenericTimer<MotorInterface> mThrottleUpdateTimer;
+
     float mKp = 0.1; // Proportional gain for PID controller
     float mKi = 0.01; // Integral gain for PID controller
     float mKd = 0.01; // Derivative gain for PID controller
     float mIntegral = 0; // Integral term for PID controller
     float mPreviousError = 0; // Error from previous loop iteration for PID controller
     unsigned long mLastTimeUpdated = 0; // Time (in milliseconds) when PWM signal was last updated for PID controller
-    core::GenericTimer<MotorInterface> mWheelSpeedTimer;
 
     void onTimerExpire(uint32_t userdata);
 };
