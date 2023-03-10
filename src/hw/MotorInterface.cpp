@@ -30,37 +30,8 @@ bool MotorInterface::init(void)
 
 void MotorInterface::loop(void)
 {
-	//if (mMotorEnabled) {
-	//	if (mMotorOn) {
-	//		// Algorithm needed
-
-	//		// 
-
-	//		// 
-
-	//		// Ratio of throttle to speed
-	//		float ratio = mPwmSignal / mThrottle;
-
-	//		// Check the time
-	//		uint32_t time = millis();
-	//		if (time - mLastTimeUpdated > mIntervalOfIncrease) {
-	//			mLastTimeUpdated = time;
-	//			if (mPwmSignal < __UINT8_MAX__) {
-	//				mPwmSignal++;
-	//			}
-	//		}
-
-	//		// Write signal to motor
-	//		analogWrite(ESC_PWM_PIN, mPwmSignal);
-	//	} else {
-
-	//		// If motor is OFF write 0's
-	//		analogWrite(ESC_PWM_PIN, 0);
-	//	}
-	//}
-
 	if (mMotorOn && mMotorPrimed) {
-		ESC.write(mThrottle);
+		ESC.write(mPwmSignal);
 	} else {
 		ESC.write(0);
 	}
@@ -164,12 +135,6 @@ void MotorInterface::onTimerExpire(uint32_t userdata)
 
 void MotorInterface::motorReadyTimer(uint32_t userdata)
 {
-	//if (userdata == 0) {
-	//	mThrottle = 0;
-	//	mMotorEnTimer.start(5000, ONESHOT, 1);
-	//} else if (userdata == 1) {
-	//	mThrottle = 0;
-	//}
 	mMotorPrimed = true;
 }
 
