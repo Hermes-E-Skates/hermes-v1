@@ -16,7 +16,7 @@ namespace bt {
 
 uint8_t inline findByte(uint8_t target, uint8_t* const bytes, uint8_t len)
 {
-	for (uint8_t i = 0; i < len; i++) {
+	for (uint8_t i = 0; i < len; i++) {d
 		if (bytes[i] = target) return i;
 	}
 	return NOT_FOUND;
@@ -33,7 +33,7 @@ BluetoothInterface::BluetoothInterface()
 
 bool BluetoothInterface::init()
 {
-	Serial2.begin(BAUD_9600);
+	Serial3.begin(BAUD_9600);
 	registerSerialHandler(&mHeartbeatHandler);
 	registerTimer(&mHeartbeatTimeoutTimer);
 	registerTimer(&mTestTimer);
@@ -53,11 +53,11 @@ void BluetoothInterface::onCriticalFault(const core::CriticalFault& criticalFaul
 
 void BluetoothInterface::checkSerialLoop(void)
 {
-	int16_t bytesAvail = Serial2.available();
+	int16_t bytesAvail = Serial3.available();
 
 	if (bytesAvail) {
 		uint8_t* buffer = new uint8_t[bytesAvail];
-		int16_t bytesRead = Serial2.readBytes(buffer, bytesAvail);
+		int16_t bytesRead = Serial3.readBytes(buffer, bytesAvail);
 
 		if (bytesRead == bytesAvail) {
 			const BluetoothCommand* cmd = parseCommand(buffer, bytesRead);
@@ -77,28 +77,28 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 	do {
 		constexpr uint8_t MIN_CMD_SIZE = 3;
 		if (len < MIN_CMD_SIZE) {
-			//Serial2.write("Here 1");
+			//Serial3.write("Here 1");
 			// Not enough bytes to make a cmd
 			break;
 		}
 
 		uint8_t stxBytePos = bt::findByte(STX, buffer, len);
 		if (stxBytePos == NOT_FOUND || stxBytePos + 2 >= len) {
-			//Serial2.write("Here 2");
+			//Serial3.write("Here 2");
 			// We NEED the STX, and 2 more bytes after it.
 			break;
 		}
 
 		uint8_t cmdIdByte = buffer[stxBytePos + 1];
 		if (cmdIdByte <= UNKNOWN_CMD || cmdIdByte >= CMD_ID_END) {
-			//Serial2.write("Here 3");
+			//Serial3.write("Here 3");
 			// CMD ID must be valid
 			break;
 		}
 
 		uint8_t dataLen = buffer[stxBytePos + 2];
 		if (stxBytePos + 2 + dataLen >= len) {
-			//Serial2.write("Here 4");
+			//Serial3.write("Here 4");
 			// STX + CMD ID + SIZE + DATA is too large, not enough bytes received
 			break;
 		}
@@ -175,18 +175,18 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 
 void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 {
-	//Serial2.write("handle cmd");
+	//Serial3.write("handle cmd");
 	if (cmd != nullptr && cmd->valid()) {
 		for (auto it : mHandlers) {
 
 			if (it->getCmdId() == cmd->getCmdId()) {
 
-				//Serial2.write("handle cmd 2");
+				//Serial3.write("handle cmd 2");
 				BluetoothResponse* resp = it->handleCommand(cmd);
 
 				if (resp != nullptr) {
 					const uint8_t* encodedResp = resp->encode();
-					Serial2.write(encodedResp, resp->getSize());
+					Serial3.write(encodedResp, resp->getSize());
 					delete resp;
 				} else {
 					DLOG_WARNING("Response from handler is null.");
@@ -249,7 +249,7 @@ bool BluetoothInterface::isConnected(void) const
 bool BluetoothInterface::sendATCommand(const std::string& AT) const
 {
 	if (!isConnected()) {
-		Serial2.write(AT.c_str(), AT.size());
+		Serial3.write(AT.c_str(), AT.size());
 		return true;
 	} else {
 		DLOG_WARNING("Cannot send AT commands while connection is established.")
