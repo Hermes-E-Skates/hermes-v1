@@ -441,4 +441,15 @@ void HermesController::onTimerExpire(uint32_t userdata)
 	}
 }
 
+void HermesController::onTimerExpire(uint32_t userdata)
+{
+	hw::LoadSensor::LeanState_t leanState = mLoadSensor.getLeanState();
+
+	if (mControl == LOAD_SENSOR) {
+		if (leanState == hw::LoadSensor::FORWARD) {
+			mMotorController.setThrottleInput(100);
+		}
+	}
+}
+
 }

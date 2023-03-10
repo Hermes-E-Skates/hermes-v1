@@ -8,6 +8,7 @@
 
 #include "../../include/hw/MotorInterface.h"
 #include "../../include/hw/LoadSensor.h"
+#include "../../include/hw/LoadSensor.h"
 
 
 namespace hermes {
@@ -90,6 +91,8 @@ void MotorInterface::motorOn(void)
 	mMotorOn = true;
 	if (!mThrottleUpdateTimer.isEnabled()) {
 		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
+	if (!mThrottleUpdateTimer.isEnabled()) {
+		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
 	}
 	return;
 }
@@ -97,6 +100,7 @@ void MotorInterface::motorOn(void)
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
+	mThrottleUpdateTimer.stop();
 	mThrottleUpdateTimer.stop();
 	return;
 }
@@ -124,6 +128,12 @@ uint8_t MotorInterface::getSpeedKmh(void)
 
 void MotorInterface::onTimerExpire(uint32_t userdata)
 {
+	if (mThrottle > mPwmSignal) {
+		mPwmSignal++;
+	} else if (mThrottle < mPwmSignal) {
+		mPwmSignal -= 10;
+	}
+
 	if (mThrottle > mPwmSignal) {
 		mPwmSignal++;
 	} else if (mThrottle < mPwmSignal) {
