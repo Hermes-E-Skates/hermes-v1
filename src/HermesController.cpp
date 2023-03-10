@@ -54,7 +54,6 @@ bool HermesController::init(void)
 	registerMessageHandler(&mBluetoothStatusMsg);
 	registerTimer(&mCheckStateTimer);
 
-	mCheckStateTimer.start(250, PERIODIC);
 	mButtonPressPinWatcher.enable();
 
 	mIdentifier = digitalRead(Pin_t::GPIO_1_PIN) == 0x00 ? LEFT_SKATE : RIGHT_SKATE;
@@ -335,6 +334,12 @@ bt::BluetoothResponse* HermesController::handleSetModeCmd(const bt::SetModeCmd* 
 	if (cmd != nullptr && cmd->valid()) {
 		
 		mControl = cmd->getControlMode();
+		if (mControl == LOAD_SENSOR && !mCheckStateTimer.isEnabled()) {
+			mCheckStateTimer.start(250, PERIODIC);
+		} else if (mControl != LOAD_SENSOR) {
+			mCheckStateTimer.stop();
+		}
+
 		resp = new bt::SetModeResp(true);
 	}
 	else {
@@ -426,17 +431,6 @@ void HermesController::onButtonPress(Pin_t pin, int16_t state)
 		case 5:
 			mMotorController.setThrottleInput(0);
 			break;
-		}
-	}
-}
-
-void HermesController::onTimerExpire(uint32_t userdata)
-{
-	hw::LoadSensor::LeanState_t leanState = mLoadSensor.getLeanState();
-
-	if (mControl == LOAD_SENSOR) {
-		if (leanState == hw::LoadSensor::FORWARD) {
-			mMotorController.setThrottleInput(100);
 		}
 	}
 }
