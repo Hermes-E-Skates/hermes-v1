@@ -47,7 +47,7 @@ BatteryInterface::BatteryInterface()
 
 bool BatteryInterface::init()
 {
-	DLOG_INFO("INIT: BQ25713");
+	// DLOG_INFO("INIT: BQ25713");
 	
 	bool status = registerTimer(&mStatusPollTimer);
 	status &= configureBq76920();
@@ -199,7 +199,7 @@ uint8_t BatteryInterface::i2cReadWithCrc(uint8_t registerAddr)
 	if (valid) {
 		return buffer[0];
 	} else {
-		DLOG_WARNING("I2C read failed");
+		// DLOG_WARNING("I2C read failed");
 		return 0;
 	}
 }
@@ -237,16 +237,16 @@ bool BatteryInterface::configureBq76920(void)
 
 	bool status = true;
 	status &= i2cWriteWithCrc(CELLBAL1,  mCellConfigReg.CellBal1Byte);
-	DLOG_INFO("BQ25713: cellBal1s=%s", status ? "SUCCESS" : "FAIL");
+	// DLOG_INFO("BQ25713: cellBal1s=%s", status ? "SUCCESS" : "FAIL");
 
 	status &= i2cWriteWithCrc(SYS_CTRL1, mSysCtrl1Reg.SysCtrl1Byte);
-	DLOG_INFO("BQ25713: sysctrl1=%s", status ? "SUCCESS" : "FAIL");
+	// DLOG_INFO("BQ25713: sysctrl1=%s", status ? "SUCCESS" : "FAIL");
 	
 	status &= i2cWriteWithCrc(SYS_CTRL2, mSysCtrl2Reg.SysCtrl2Byte);
-	DLOG_INFO("BQ25713: sysctrl2=%s", status ? "SUCCESS" : "FAIL");
+	// DLOG_INFO("BQ25713: sysctrl2=%s", status ? "SUCCESS" : "FAIL");
 
 	mSysCtrl2Reg.SysCtrl2Byte = i2cReadWithCrc(SYS_CTRL2);
-	DLOG_INFO("BQ25713 Write Confirm: DSG_ON=%s CHG_ON=%s", mSysCtrl2Reg.SysCtrl2Bit.DSG_ON ? "ON" : "OFF", mSysCtrl2Reg.SysCtrl2Bit.CHG_ON ? "ON" : "OFF");
+	// DLOG_INFO("BQ25713 Write Confirm: DSG_ON=%s CHG_ON=%s", mSysCtrl2Reg.SysCtrl2Bit.DSG_ON ? "ON" : "OFF", mSysCtrl2Reg.SysCtrl2Bit.CHG_ON ? "ON" : "OFF");
 	return status;
 }
 
@@ -266,15 +266,15 @@ void BatteryInterface::onTimerExpire(uint32_t userData)
 		//		bytes[1] = Wire.read();
 		//		success = (Wire.endTransmission() == 0);
 		//		if (success) {
-		//			DLOG_DEBUG("value=0x%X 0x%X", bytes[0], bytes[1]);
+		//			// DLOG_DEBUG("value=0x%X 0x%X", bytes[0], bytes[1]);
 		//		} else {
-		//			DLOG_ERROR("couldnt read bytes.")
+		//			// DLOG_ERROR("couldnt read bytes.")
 		//		}
 		//	} else {
-		//		DLOG_ERROR("i2c read request failed");
+		//		// DLOG_ERROR("i2c read request failed");
 		//	}
 		//} else {
-		//	DLOG_ERROR("i2c write slave addr and register failed");
+		//	// DLOG_ERROR("i2c write slave addr and register failed");
 		//}
 
 
@@ -323,7 +323,7 @@ void BatteryInterface::onTimerExpire(uint32_t userData)
 	//combined = static_cast<uint32_t>(low) | (static_cast<uint32_t>(high) << 8);
 	//mCell3 = static_cast<uint16_t>(combined * 382 / 10000);
 
-	//DLOG_DEBUG("Cell1=%dV Cell2=%dV Cell3=%dV", mCell1, mCell2, mCell3);
+	//// DLOG_DEBUG("Cell1=%dV Cell2=%dV Cell3=%dV", mCell1, mCell2, mCell3);
 
 	//uint8_t batPercentEstimate = getPercentEstimateFromVoltage();
 	//if (batPercentEstimate == 0) mState = DEAD;

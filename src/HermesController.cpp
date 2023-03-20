@@ -50,13 +50,13 @@ bool HermesController::init(void)
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMaxSpeedCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetModeCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMotorEnableCmdHandler);
-	status &= registerObserver(&mButtonPressPinWatcher);
+	//status &= registerObserver(&mButtonPressPinWatcher);
 	registerMessageHandler(&mChargeRdyMsgHandler);
 	registerMessageHandler(&mBluetoothStatusMsg);
 	registerTimer(&mCheckStateTimer);
 	registerTimer(&mNeutralLoadTimer);
 
-	mButtonPressPinWatcher.enable();
+	//mButtonPressPinWatcher.enable();
 
 	mIdentifier = digitalRead(Pin_t::GPIO_1_PIN) == 0x00 ? LEFT_SKATE : RIGHT_SKATE;
 	return status;
@@ -69,11 +69,11 @@ void HermesController::loop(void)
 
 void HermesController::onCriticalFault(const core::CriticalFault& criticalFault)
 {
-	DLOG_ERROR("CRITICAL FAULT: code=0x%X source=0x%X timestamp=%lu \'%s\'"
-		, criticalFault.getFaultCode()
-		, criticalFault.getSource()
-		, criticalFault.getTimeOfOccurence()
-		, criticalFault.getMessage().c_str());
+	// DLOG_ERROR("CRITICAL FAULT: code=0x%X source=0x%X timestamp=%lu \'%s\'"
+	//	, criticalFault.getFaultCode()
+	//	, criticalFault.getSource()
+	//	, criticalFault.getTimeOfOccurence()
+	//	, criticalFault.getMessage().c_str());
 	//mState = FAULT;
 	return;
 }
@@ -105,7 +105,7 @@ void HermesController::changeState(State_t state)
 	switch (state) {
 	case INIT:
 		// Starts in in, will never change into init.
-		DLOG_ERROR("Shouldn't be changing to init state");
+		// DLOG_ERROR("Shouldn't be changing to init state");
 		break;
 
 	case FAULT:
@@ -153,7 +153,7 @@ void HermesController::changeState(State_t state)
 		break;
 
 	default:
-		DLOG_ERROR("Trying to change into unknown state.");
+		// DLOG_ERROR("Trying to change into unknown state.");
 		break;
 	}
 
@@ -394,7 +394,7 @@ void HermesController::handleBluetoothStatusMsg(const messages::BluetoothStatusM
 
 void HermesController::onButtonPress(Pin_t pin, int16_t state)
 {
-	DLOG_INFO("Button state=%s", state == LOW ? "DOWN" : "UP");
+	// DLOG_INFO("Button state=%s", state == LOW ? "DOWN" : "UP");
 	//if (state == LOW) {
 	//	if (mState == MOTOR_OFF) {
 	//		changeState(MOTOR_DISABLED);
@@ -403,38 +403,38 @@ void HermesController::onButtonPress(Pin_t pin, int16_t state)
 	//	}
 	//}
 
-	if (state == LOW) {
-		mTestState++;
-		if (mTestState >= 6) {
-			mTestState = 0;
-		}
+	//if (state == LOW) {
+	//	mTestState++;
+	//	if (mTestState >= 6) {
+	//		mTestState = 0;
+	//	}
 
-		switch (mTestState) {
-		case 0:
-			changeState(MOTOR_DISABLED);
-			break;
+	//	switch (mTestState) {
+	//	case 0:
+	//		changeState(MOTOR_DISABLED);
+	//		break;
 
-		case 1:
-			changeState(MOTOR_OFF);
-			break;
+	//	case 1:
+	//		changeState(MOTOR_OFF);
+	//		break;
 
-		case 2:
-			changeState(READY);
-			break;
+	//	case 2:
+	//		changeState(READY);
+	//		break;
 
-		case 3:
-			mMotorController.setThrottleInput(175);
-			break;
+	//	case 3:
+	//		mMotorController.setThrottleInput(175);
+	//		break;
 
-		case 4:
-			mMotorController.setThrottleInput(255);
-			break;
+	//	case 4:
+	//		mMotorController.setThrottleInput(255);
+	//		break;
 
-		case 5:
-			mMotorController.setThrottleInput(0);
-			break;
-		}
-	}
+	//	case 5:
+	//		mMotorController.setThrottleInput(0);
+	//		break;
+	//	}
+	//}
 }
 
 void HermesController::onTimerExpire(uint32_t userdata)
@@ -443,7 +443,7 @@ void HermesController::onTimerExpire(uint32_t userdata)
 
 	if (mControl == LOAD_SENSOR) {
 		if (leanState == hw::LoadSensor::FORWARD) {
-			mMotorController.setThrottleInput(180);
+			mMotorController.setThrottleInput(25);
 			mNeutralLoadTimer.stop();
 		} else if (leanState == hw::LoadSensor::BACKWARD) {
 			mMotorController.setThrottleInput(0);
@@ -454,7 +454,7 @@ void HermesController::onTimerExpire(uint32_t userdata)
 	}
 }
 
-void HermesController::onTimerExpire(uint32_t userdata)
+void HermesController::onNeutralLoadTimerExpire(uint32_t userdata)
 {
 	mMotorController.setThrottleInput(0);
 }

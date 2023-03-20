@@ -16,7 +16,7 @@ namespace bt {
 
 uint8_t inline findByte(uint8_t target, uint8_t* const bytes, uint8_t len)
 {
-	for (uint8_t i = 0; i < len; i++) {d
+	for (uint8_t i = 0; i < len; i++) {
 		if (bytes[i] = target) return i;
 	}
 	return NOT_FOUND;
@@ -37,7 +37,7 @@ bool BluetoothInterface::init()
 	registerSerialHandler(&mHeartbeatHandler);
 	registerTimer(&mHeartbeatTimeoutTimer);
 	registerTimer(&mTestTimer);
-	mTestTimer.start(25, PERIODIC);
+	mTestTimer.start(50, PERIODIC);
 	return true;
 }
 
@@ -110,7 +110,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		CmdId_t cmdId = static_cast<CmdId_t>(cmdIdByte);
-		DLOG_DEBUG("New cmd with id=%d, datasize=%d", cmdId, dataLen);
+		// DLOG_DEBUG("New cmd with id=%d, datasize=%d", cmdId, dataLen);
 
 		switch(cmdId) {
 		case HEARTBEAT:
@@ -189,7 +189,7 @@ void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 					Serial3.write(encodedResp, resp->getSize());
 					delete resp;
 				} else {
-					DLOG_WARNING("Response from handler is null.");
+					// DLOG_WARNING("Response from handler is null.");
 				}
 			}
 		}
@@ -199,7 +199,7 @@ void BluetoothInterface::handleNewMessage(const BluetoothCommand* cmd)
 void BluetoothInterface::onHeartbeatTimerExpire(uint32_t userdata)
 {
 	if (mConnected == true) {
-		DLOG_WARNING("Bluetooth connection lost.");
+		// DLOG_WARNING("Bluetooth connection lost.");
 		messages::BluetoothStatusMsg msg(false);
 		sendMessage(&msg);
 	}
@@ -215,7 +215,7 @@ void BluetoothInterface::onTestTimerTimeout(uint32_t userdata)
 BluetoothResponse* BluetoothInterface::handleHeartbeat(const HeartbeatCmd* cmd)
 {
 	if (mConnected == false) {
-		DLOG_WARNING("Bluetooth connection established.");
+		// DLOG_WARNING("Bluetooth connection established.");
 		messages::BluetoothStatusMsg msg(true);
 		sendMessage(&msg);
 	}
@@ -252,7 +252,7 @@ bool BluetoothInterface::sendATCommand(const std::string& AT) const
 		Serial3.write(AT.c_str(), AT.size());
 		return true;
 	} else {
-		DLOG_WARNING("Cannot send AT commands while connection is established.")
+		// DLOG_WARNING("Cannot send AT commands while connection is established.")
 		return false;
 	}
 }

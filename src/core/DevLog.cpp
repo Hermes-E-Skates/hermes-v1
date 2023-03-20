@@ -23,14 +23,14 @@ DevLog::DevLog()
 }
 
 // ---------------------------------------------------------------
-// @Brief: initialized the Serial3 port.
+// @Brief: initialized the Serial2 port.
 // @Param: userData - unused.
 // @Return: bool - returns true if function executed ok.
 // ---------------------------------------------------------------
 void DevLog::init()
 {
     level = DEBUG;
-    Serial3.begin(BAUD_115200);
+    Serial2.begin(BAUD_115200);
 }
 
 // ---------------------------------------------------------------
@@ -47,7 +47,7 @@ int DevLog::print(const char* fmt, ...)
     va_start(args, fmt);
     int return_status = vsnprintf(buff, sizeof(buff), fmt, args);
     va_end(args);
-    Serial3.print(buff);
+    Serial2.print(buff);
     return return_status;
 }
 

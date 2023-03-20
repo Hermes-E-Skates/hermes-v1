@@ -8,32 +8,96 @@
 
 #include "../../include/hw/MotorInterface.h"
 #include "../../include/hw/LoadSensor.h"
-#include "../../include/hw/LoadSensor.h"
 
 
 namespace hermes {
 namespace hw {
 
 MotorInterface::MotorInterface(void)
-	: mThrottleUpdateTimer(this, &MotorInterface::onTimerExpire)
-	, mMotorEnTimer(this, &MotorInterface::motorReadyTimer)
+	: mMotorEnTimer(this, &MotorInterface::motorReadyTimer)
+	, mHallEffectObserver(this, &MotorInterface::onHallEffectStateChange, Pin_t::MOTOR_SENSE_H1)
 {
 	return;
 }
 
 bool MotorInterface::init(void)
 {
-	registerTimer(&mThrottleUpdateTimer);
+	Serial.begin(115200); delay(10);
 	registerTimer(&mMotorEnTimer);
+	registerObserver(&mHallEffectObserver);
+
+	Serial.println("Successfully registered the hall effect sensor.");
 	ESC.attach(ESC_PWM_PIN, 1000, 2000);
+
 	return false;
 }
 
 void MotorInterface::loop(void)
 {
+	if (Serial.read() > 0) {
+		mKp += 0.1;
+		Serial.print("############# Kp = ");
+		Serial.println(mKp);
+	}
 	if (mMotorOn && mMotorPrimed) {
-		ESC.write(mPwmSignal);
-	} else {
+		// Calculate error between desired speed setpoint and current speed of the motor
+		if (millis() - mLastTime > 282) {
+			for (int i = 0; i < 10; i++) {
+				mHallSpeedBuffer[i] = 0; // kmph
+			}
+			Serial.println("FLUSHING BUFFER");
+			mLastTime = millis();
+			mHallCounter = 0;
+		}
+
+		float speed = MotorInterface::getSpeedKmh();
+		float error = mThrottle - speed;
+
+		Serial.print("In:\t");
+		Serial.print(mThrottle);
+		Serial.print("\t");
+
+		Serial.print("Hall:\t");
+		Serial.print(speed);
+		Serial.print("\t");
+
+
+		Serial.print("E:\t");
+		Serial.print(error);
+		Serial.print("\t");
+
+		// Compute PID output
+		unsigned long current_time = millis();
+		float dt = (current_time - mLastTimeUpdated) / 1000.0f; // Time elapsed since last loop iteration, in seconds
+		mIntegral += error * dt;
+		float derivative = (error - mPreviousError) / dt;
+		float output = mThrottle + mKp * error + mKi * mIntegral + mKd * derivative;
+
+		mPreviousError = error;
+		mLastTimeUpdated = current_time;
+
+		uint8_t throttle = 0;
+		// Convert PID output to PWM signal (assuming linear relationship)
+		if (output > 0) {
+			throttle = output * 180 / 63;
+			//throttle = (uint8_t)(-0.0002 * pow(output, 4) + 0.0257 * pow(output, 3) - 1.4779 * pow(output, 2) + 39.866 * output - 356.35);
+		}
+		if (throttle > 180) {
+			throttle = 180; // Limit throttle to maximum value set by user
+		}
+		else if (throttle < 0) {
+			throttle = 0; // Ensure throttle is positive
+		}
+		mPwmSignal = (uint8_t)throttle;
+
+		Serial.print("Out:\t");
+		Serial.print(mThrottle);
+		Serial.print("\n");
+
+
+		ESC.write(throttle); // throttle for PID, mThrottle without
+	}
+	else {
 		ESC.write(0);
 	}
 }
@@ -45,7 +109,8 @@ void MotorInterface::onCriticalFault(const core::CriticalFault& criticalFault)
 
 void MotorInterface::setThrottleInput(uint8_t throttle)
 {
-	mThrottle = map(throttle, 0, 255, 0, 180);
+	mThrottle = map(throttle, 0, 255, 0.0f, 180);
+
 	return;
 }
 
@@ -89,16 +154,19 @@ MaxAccel_t MotorInterface::getMaxAccel(void) const
 void MotorInterface::motorOn(void)
 {
 	mMotorOn = true;
-	if (!mThrottleUpdateTimer.isEnabled()) {
-		mThrottleUpdateTimer.startMicros(19600, PERIODIC);
+
+	if (!mHallEffectObserver.isEnabled()) {
+		mHallEffectObserver.enable();
+		Serial.println("HallEffectObserver registered.");
 	}
+
 	return;
 }
 
 void MotorInterface::motorOff(void)
 {
 	mMotorOn = false;
-	mThrottleUpdateTimer.stop();
+
 	return;
 }
 
@@ -106,7 +174,8 @@ void MotorInterface::enableMotor(void)
 {
 	mMotorEnabled = true;
 	digitalWrite(Pin_t::MOT_EN, HIGH);
-	mMotorEnTimer.start(7000, ONESHOT, 0);
+	mMotorEnTimer.start(1000, ONESHOT, 0);
+
 	return;
 }
 
@@ -118,25 +187,59 @@ void MotorInterface::disableMotor(void)
 	return;
 }
 
-uint8_t MotorInterface::getSpeedKmh(void)
+float MotorInterface::getSpeedKmh(void)
 {
-	return;
-}
-
-void MotorInterface::onTimerExpire(uint32_t userdata)
-{
-	if (mThrottle > mPwmSignal) {
-		mPwmSignal++;
-	} else if (mThrottle < mPwmSignal) {
-		mPwmSignal -= 10;
+	float sum = 0;
+	for (int i = 0; i < 10; i++) {
+		sum += mHallSpeedBuffer[i];
 	}
-
-	return;
+	if (sum <= 0) {
+		return 0.0f;
+	}
+	return sum / 10.0f;
+	// return mHallSpeed;
 }
 
 void MotorInterface::motorReadyTimer(uint32_t userdata)
 {
 	mMotorPrimed = true;
+}
+
+void MotorInterface::onHallEffectStateChange(Pin_t pin, int16_t state)
+{
+	if (state == 1) {
+		mHallCounter++;
+		uint32_t delta = millis() - mLastTime;
+		if (mHallCounter % 7 == 0) {
+			//Serial.println(delta);
+			mLastTime = millis();
+			float rpm = (60000.0f / delta);
+			mHallSpeedBuffer[(int)mHallCounter/7] = rpm * 12.5f * 0.001885f; // km/h
+			Serial.println(rpm * 12.5f * 0.001885f);
+			//mHallSpeed = rpm * 12.5f * 0.001885f; // km/h
+		}
+		if (mHallCounter >= 69) {
+			mHallCounter = -1;
+		}
+
+		//uint32_t delta = micros() - mLastTime;
+		////Serial.println(delta);
+		//mLastTime = micros();
+		//float rpm = (60000000.0f / delta);
+		//mHallSpeedBuffer[mHallCounter] = rpm * 12.5f * 0.001885f; // km/h
+
+
+		//unsigned long delta = millis() - mLastTime;
+		//mLastTime = millis();
+		//float rpm = 60000.0f * 1.0f / 7.0f / (float)delta;
+
+		//mHallSpeedBuffer[mHallCounter % 10] = rpm * 0.0235619449f; // Convert RPM to KMH (wheel diamter is 0.125m)
+		//mHallCounter++;
+
+		//if (mHallCounter > 69) {
+		//	mHallCounter = 0;
+		//}
+	}
 }
 
 }

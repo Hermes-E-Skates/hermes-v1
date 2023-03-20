@@ -22,7 +22,7 @@ LoadSensor::LoadSensor()
 
 bool LoadSensor::init(void)
 {
-    DLOG_INFO("Init load sensor");
+    // DLOG_INFO("Init load sensor");
 
     mLoadCellFront.begin();
     mLoadCellBack.begin();
@@ -35,19 +35,19 @@ bool LoadSensor::init(void)
     if (!loadcell2Rdy) loadcell2Rdy = mLoadCellBack.startMultiple(STABILIZING_TIME, tare);
     }
     if (mLoadCellFront.getTareTimeoutFlag()) {
-    DLOG_ERROR("Timeout, check MCU>HX711 no.1 wiring and pin designations");
+    // DLOG_ERROR("Timeout, check MCU>HX711 no.1 wiring and pin designations");
     }
     if (mLoadCellBack.getTareTimeoutFlag()) {
-    DLOG_ERROR("Timeout, check MCU>HX711 no.2 wiring and pin designations")
+    // DLOG_ERROR("Timeout, check MCU>HX711 no.2 wiring and pin designations")
     }
     mLoadCellFront.setCalFactor(CALIBRATION_VALUE1); // user set calibration value (float)
     mLoadCellBack.setCalFactor(CALIBRATION_VALUE2); // user set calibration value (float)
-    DLOG_INFO("Startup is complete")
+    // DLOG_INFO("Startup is complete")
 }
 
 void LoadSensor::loop(void)
 {
-    const int serialPrintInterval = 0; //increase value to slow down serial print activity
+    /*const int serialPrintInterval = 0; //increase value to slow down serial print activity
 
     // check for new data/start next conversion
     // get smoothed value from data set
@@ -67,7 +67,7 @@ void LoadSensor::loop(void)
         else {
             mLeanState = NEUTRAL;
         }
-    }
+    }*/
 }
 
 void LoadSensor::onCriticalFault(const core::CriticalFault& criticalFault)

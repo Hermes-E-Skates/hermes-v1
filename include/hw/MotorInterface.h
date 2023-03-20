@@ -33,7 +33,7 @@ public:
 	void motorOff(void);
 	void enableMotor(void);
 	void disableMotor(void);
-	uint8_t getSpeedKmh(void);
+	float getSpeedKmh(void);
 
 private:
 	Servo ESC;
@@ -44,20 +44,25 @@ private:
 	bool mMotorPrimed = false;
     uint8_t mPwmSignal = 0;
     uint8_t mThrottle = 0;
-    uint32_t mLastTimeUpdated = 0;
+	uint32_t mLastTimeUpdated = 0;
+	uint32_t mLastTimer = 0;
+	int8_t mHallCounter = 0;
+	
+	float mHallSpeedBuffer[10];
+	float mHallSpeed = 0.0f;
     uint16_t mIntervalOfIncrease = 10;
-    core::GenericTimer<MotorInterface> mThrottleUpdateTimer;
+    core::GenericObserver<MotorInterface> mHallEffectObserver;
 
-    float mKp = 0.1; // Proportional gain for PID controller
-    float mKi = 0.01; // Integral gain for PID controller
-    float mKd = 0.01; // Derivative gain for PID controller
+    float mKp = 1.0; // Proportional gain for PID controller
+    float mKi = 0.0; // Integral gain for PID controller
+    float mKd = 0.0; // Derivative gain for PID controller
     float mIntegral = 0; // Integral term for PID controller
     float mPreviousError = 0; // Error from previous loop iteration for PID controller
-    core::GenericTimer<MotorInterface> mWheelSpeedTimer;
 	core::GenericTimer<MotorInterface> mMotorEnTimer;
 
-	void onTimerExpire(uint32_t userdata);
 	void motorReadyTimer(uint32_t userdata);
+	void onHallEffectStateChange(Pin_t pin, int16_t state);
+	unsigned long mLastTime = 0;
 };
 
 }

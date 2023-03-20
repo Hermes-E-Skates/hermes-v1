@@ -45,10 +45,10 @@ uint64_t CriticalFault::getTimeOfOccurence(void) const
 std::string CriticalFault::getMessage(void) const
 {
 	if (mMessage.empty()) {
-		DLOG_WARNING("Critical fault message is empty.");
+		// DLOG_WARNING("Critical fault message is empty.");
 	}
 	else {
-		DLOG_WARNING("%s", mMessage.c_str());
+		// DLOG_WARNING("%s", mMessage.c_str());
 	}
 	return mMessage;
 }
