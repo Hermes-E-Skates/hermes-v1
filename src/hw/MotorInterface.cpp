@@ -230,6 +230,7 @@ void MotorInterface::onHallEffectStateChange(Pin_t pin, int16_t state)
 	if (state == 1) {
 		mHallCounter++;
 		uint32_t delta = millis() - mLastTime;
+
 		if (mHallCounter % 7 == 0) {
 			mLastTime = millis();
 			float rpm = (60000.0f / delta);
