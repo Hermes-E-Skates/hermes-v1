@@ -30,6 +30,7 @@
 #include "cmds/SetMaxAccel.h"
 #include "cmds/SetThrottle.h"
 #include "cmds/SetMotorEnable.h"
+#include "cmds/SetPIDK1.h"
 #include "core/CommonDefs.h"
 #include "core/GenericTimer.h"
 #include "core/MessageHandler.h"
@@ -86,6 +87,7 @@ private:
 	bt::GenericBluetoothHandler<HermesController, bt::SetMaxSpeedCmd> mSetMaxSpeedCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::SetModeCmd> mSetModeCmdHandler;
 	bt::GenericBluetoothHandler<HermesController, bt::SetMotorEnableCmd> mSetMotorEnableCmdHandler;
+	bt::GenericBluetoothHandler<HermesController, bt::SetPIDK1Cmd> mSetPIDK1CmdHandler;
 
 	void enterSleep(void);
 	void pullbackFromSleep(void);
@@ -99,6 +101,7 @@ private:
 	bt::BluetoothResponse* handleSetMaxSpeedCmd(const bt::SetMaxSpeedCmd* cmd);
 	bt::BluetoothResponse* handleSetModeCmd(const bt::SetModeCmd* cmd);
 	bt::BluetoothResponse* handleSetMotorEnCmd(const bt::SetMotorEnableCmd* cmd);
+	bt::BluetoothResponse* handleSetPIDK1Cmd(const bt::SetPIDK1Cmd* cmd);
 	void handleChargeRdyMsg(const messages::ChargeRdyMsg* msg);
 	void handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg);
 	void onButtonPress(Pin_t pin, int16_t state);

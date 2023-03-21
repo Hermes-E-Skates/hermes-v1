@@ -27,6 +27,7 @@ public:
 	void setThrottleInput(uint8_t throttle);
 	void setMaxSpeed(MaxSpeed_t maxSpeed);
 	void setMaxAccel(MaxAccel_t maxAccel);
+	void setPIDK1(uint8_t k1);
 	MaxSpeed_t getMaxSpeed(void) const;
 	MaxAccel_t getMaxAccel(void) const;
 	void motorOn(void);
@@ -53,9 +54,10 @@ private:
     uint16_t mIntervalOfIncrease = 10;
     core::GenericObserver<MotorInterface> mHallEffectObserver;
 
-    float mKp = 1.0; // Proportional gain for PID controller
-    float mKi = 0.0; // Integral gain for PID controller
-    float mKd = 0.0; // Derivative gain for PID controller
+    float mKp = 1.5; // Proportional gain for PID controller
+    float mKi = 0.2; // Integral gain for PID controller
+    float mKd = 5.0; // Derivative gain for PID controller
+	uint8_t mK1 = 1.0; // Dynamic scaling value
     float mIntegral = 0; // Integral term for PID controller
     float mPreviousError = 0; // Error from previous loop iteration for PID controller
 	core::GenericTimer<MotorInterface> mMotorEnTimer;

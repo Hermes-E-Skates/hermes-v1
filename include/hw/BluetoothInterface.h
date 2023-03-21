@@ -27,6 +27,7 @@
 #include "../cmds/SetMaxSpeed.h"
 #include "../cmds/SetMaxAccel.h"
 #include "../cmds/SetMotorEnable.h"
+#include "../cmds/SetPIDK1.h"
 #include "../cmds/Heartbeat.h"
 
 

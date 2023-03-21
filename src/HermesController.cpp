@@ -26,6 +26,7 @@ HermesController::HermesController(void)
 	, mSetMaxSpeedCmdHandler(this, &HermesController::handleSetMaxSpeedCmd, bt::SET_MAX_SPEED)
 	, mSetModeCmdHandler(this, &HermesController::handleSetModeCmd, bt::SET_MODE)
 	, mSetMotorEnableCmdHandler(this, &HermesController::handleSetMotorEnCmd, bt::SET_MOTOR_EN)
+	, mSetPIDK1CmdHandler(this, &HermesController::handleSetPIDK1Cmd, bt::SET_PID_K1)
 	, mButtonPressPinWatcher(this, &HermesController::onButtonPress, B1_PIN)
 	, mCheckStateTimer(this, &HermesController::onTimerExpire)
 	, mNeutralLoadTimer(this, &HermesController::onNeutralLoadTimerExpire)
@@ -50,6 +51,7 @@ bool HermesController::init(void)
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMaxSpeedCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetModeCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMotorEnableCmdHandler);
+	status &= mBluetoothInterface.registerSerialHandler(&mSetPIDK1CmdHandler);
 	//status &= registerObserver(&mButtonPressPinWatcher);
 	registerMessageHandler(&mChargeRdyMsgHandler);
 	registerMessageHandler(&mBluetoothStatusMsg);
@@ -367,6 +369,21 @@ bt::BluetoothResponse* HermesController::handleSetMotorEnCmd(const bt::SetMotorE
 	}
 	else {
 		resp = new bt::SetMotorEnableResp(false);
+	}
+
+	return resp;
+}
+
+bt::BluetoothResponse* HermesController::handleSetPIDK1Cmd(const bt::SetPIDK1Cmd* cmd)
+{
+	bt::SetPIDK1Resp* resp = nullptr;
+	if (cmd != nullptr && cmd->valid()) {
+		mMotorController.setPIDK1(cmd->getPIDK1());
+		Serial3.write("Reached K1 handler.");
+		resp = new bt::SetPIDK1Resp(true);
+	}
+	else {
+		resp = new bt::SetPIDK1Resp(false);
 	}
 
 	return resp;

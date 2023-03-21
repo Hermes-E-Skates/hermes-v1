@@ -83,6 +83,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		uint8_t stxBytePos = bt::findByte(STX, buffer, len);
+
 		if (stxBytePos == NOT_FOUND || stxBytePos + 2 >= len) {
 			//Serial3.write("Here 2");
 			// We NEED the STX, and 2 more bytes after it.
@@ -90,6 +91,7 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 		}
 
 		uint8_t cmdIdByte = buffer[stxBytePos + 1];
+
 		if (cmdIdByte <= UNKNOWN_CMD || cmdIdByte >= CMD_ID_END) {
 			//Serial3.write("Here 3");
 			// CMD ID must be valid
@@ -159,6 +161,10 @@ const BluetoothCommand* BluetoothInterface::parseCommand(uint8_t* const buffer, 
 
 		case SET_MOTOR_EN:
 			cmd = new SetMotorEnableCmd();
+			break;
+
+		case SET_PID_K1:
+			cmd = new SetPIDK1Cmd();
 			break;
 
 		default:

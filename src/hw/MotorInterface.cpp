@@ -8,6 +8,7 @@
 
 #include "../../include/hw/MotorInterface.h"
 #include "../../include/hw/LoadSensor.h"
+#include "../../include/cmds/SetPIDK1.h"
 
 
 namespace hermes {
@@ -71,7 +72,21 @@ void MotorInterface::loop(void)
 		float dt = (current_time - mLastTimeUpdated) / 1000.0f; // Time elapsed since last loop iteration, in seconds
 		mIntegral += error * dt;
 		float derivative = (error - mPreviousError) / dt;
-		float output = mThrottle + mKp * error + mKi * mIntegral + mKd * derivative;
+		
+
+		float K1 = mK1 * 10.0f / 255.0;
+		if (K1 < 1) {
+			K1 = 1.0;
+		}
+		else if (K1 > 10) {
+			K1 = 10.0;
+		}
+
+		Serial.print("K1:\t");
+		Serial.print(K1);
+		Serial.print("\t");
+
+		float output = (mThrottle + mKp * error + mKi * mIntegral + mKd * derivative) * (float)K1;
 
 		mPreviousError = error;
 		mLastTimeUpdated = current_time;
@@ -80,7 +95,6 @@ void MotorInterface::loop(void)
 		// Convert PID output to PWM signal (assuming linear relationship)
 		if (output > 0) {
 			throttle = output * 180 / 63;
-			//throttle = (uint8_t)(-0.0002 * pow(output, 4) + 0.0257 * pow(output, 3) - 1.4779 * pow(output, 2) + 39.866 * output - 356.35);
 		}
 		if (throttle > 180) {
 			throttle = 180; // Limit throttle to maximum value set by user
@@ -91,7 +105,7 @@ void MotorInterface::loop(void)
 		mPwmSignal = (uint8_t)throttle;
 
 		Serial.print("Out:\t");
-		Serial.print(mThrottle);
+		Serial.print(throttle);
 		Serial.print("\n");
 
 
@@ -109,7 +123,7 @@ void MotorInterface::onCriticalFault(const core::CriticalFault& criticalFault)
 
 void MotorInterface::setThrottleInput(uint8_t throttle)
 {
-	mThrottle = map(throttle, 0, 255, 0.0f, 180);
+	mThrottle = map(throttle, 0, 255, 0.0f, 18);
 
 	return;
 }
@@ -138,6 +152,12 @@ void MotorInterface::setMaxAccel(MaxAccel_t maxAccel)
 		mIntervalOfIncrease = 0;
 		break;
 	}
+	return;
+}
+
+void MotorInterface::setPIDK1(uint8_t k1)
+{
+	mK1 = k1;
 	return;
 }
 
@@ -184,6 +204,7 @@ void MotorInterface::disableMotor(void)
 	mMotorEnabled = false;
 	mMotorPrimed = false;
 	digitalWrite(Pin_t::MOT_EN, LOW);
+
 	return;
 }
 
@@ -197,7 +218,6 @@ float MotorInterface::getSpeedKmh(void)
 		return 0.0f;
 	}
 	return sum / 10.0f;
-	// return mHallSpeed;
 }
 
 void MotorInterface::motorReadyTimer(uint32_t userdata)
@@ -211,34 +231,13 @@ void MotorInterface::onHallEffectStateChange(Pin_t pin, int16_t state)
 		mHallCounter++;
 		uint32_t delta = millis() - mLastTime;
 		if (mHallCounter % 7 == 0) {
-			//Serial.println(delta);
 			mLastTime = millis();
 			float rpm = (60000.0f / delta);
 			mHallSpeedBuffer[(int)mHallCounter/7] = rpm * 12.5f * 0.001885f; // km/h
-			Serial.println(rpm * 12.5f * 0.001885f);
-			//mHallSpeed = rpm * 12.5f * 0.001885f; // km/h
 		}
 		if (mHallCounter >= 69) {
 			mHallCounter = -1;
 		}
-
-		//uint32_t delta = micros() - mLastTime;
-		////Serial.println(delta);
-		//mLastTime = micros();
-		//float rpm = (60000000.0f / delta);
-		//mHallSpeedBuffer[mHallCounter] = rpm * 12.5f * 0.001885f; // km/h
-
-
-		//unsigned long delta = millis() - mLastTime;
-		//mLastTime = millis();
-		//float rpm = 60000.0f * 1.0f / 7.0f / (float)delta;
-
-		//mHallSpeedBuffer[mHallCounter % 10] = rpm * 0.0235619449f; // Convert RPM to KMH (wheel diamter is 0.125m)
-		//mHallCounter++;
-
-		//if (mHallCounter > 69) {
-		//	mHallCounter = 0;
-		//}
 	}
 }
 

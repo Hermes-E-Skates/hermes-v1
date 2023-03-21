@@ -30,7 +30,8 @@ enum CmdId_t : int8_t {
     SET_MAX_SPEED = 0x42,
     SET_MAX_ACCEL = 0x43,
     SET_MOTOR_EN = 0x44,
-    CMD_ID_END = 0x45
+    SET_PID_K1 = 0x45,
+    CMD_ID_END = 0x46,
 };
 
 class BluetoothCommand
