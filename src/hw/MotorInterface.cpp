@@ -50,6 +50,11 @@ void MotorInterface::loop(void)
 			mLastTime = millis();
 			mHallCounter = 0;
 		}
+		if (mThrottle == 0) {
+			ESC.write(0);
+			return; // NOTE: EARLY RETURN IN LOOP
+		}
+
 
 		float speed = MotorInterface::getSpeedKmh();
 		float error = mThrottle - speed;
@@ -228,17 +233,24 @@ void MotorInterface::motorReadyTimer(uint32_t userdata)
 void MotorInterface::onHallEffectStateChange(Pin_t pin, int16_t state)
 {
 	if (state == 1) {
-		mHallCounter++;
+
 		uint32_t delta = millis() - mLastTime;
 
-		if (mHallCounter % 7 == 0) {
-			mLastTime = millis();
-			float rpm = (60000.0f / delta);
-			mHallSpeedBuffer[(int)mHallCounter/7] = rpm * 12.5f * 0.001885f; // km/h
+		//if (mHallCounter % 7 == 0) {
+		//	mLastTime = millis();
+		//	float rpm = (60000.0f / delta);
+		//	mHallSpeedBuffer[(int)mHallCounter/7] = rpm * 12.5f * 0.001885f; // km/h
+		//}
+		//if (mHallCounter >= 69) {
+		//	mHallCounter = -1;
+		//}
+		float rpm = (60000.0f / (delta* 7)); // rpm from 1/7 rev => 60 000 milliseconds per min / ms per rotation
+		mHallSpeedBuffer[mHallCounter] = rpm * 12.5f * 0.001885f; // rpm to kmph; 12.5f in cm
+		mHallCounter++;
+		if (mHallCounter > 34) {
+			mHallCounter = 0;
 		}
-		if (mHallCounter >= 69) {
-			mHallCounter = -1;
-		}
+		mLastTime = millis();
 	}
 }
 

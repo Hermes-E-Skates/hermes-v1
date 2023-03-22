@@ -49,7 +49,7 @@ private:
 	uint32_t mLastTimer = 0;
 	int8_t mHallCounter = 0;
 	
-	float mHallSpeedBuffer[10];
+	float mHallSpeedBuffer[35];
 	float mHallSpeed = 0.0f;
     uint16_t mIntervalOfIncrease = 10;
     core::GenericObserver<MotorInterface> mHallEffectObserver;
