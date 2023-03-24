@@ -17,20 +17,13 @@ namespace hermes {
 
 HermesController::HermesController(void)
 	: BaseApp()
-	, mGetInfoCmdHandler(this, &HermesController::handleGetInfoCmd, bt::GET_INFO)
-	, mGetFaultCmdHandler(this, &HermesController::handleGetFaultCmd, bt::GET_FAULT)
 	, mGetIdCmdHandler(this, &HermesController::handleGetIdCmd, bt::GET_ID)
-	, mGetBatteryCmdHandler(this, &HermesController::handleGetBatteryCmd, bt::GET_BATTERY)
 	, mSetThrottleCmdHandler(this, &HermesController::handleSetThrottleCmd, bt::SET_THROTTLE)
 	, mSetMaxAccelCmdHandler(this, &HermesController::handleSetMaxAccelCmd, bt::SET_MAX_ACCEL)
 	, mSetMaxSpeedCmdHandler(this, &HermesController::handleSetMaxSpeedCmd, bt::SET_MAX_SPEED)
 	, mSetModeCmdHandler(this, &HermesController::handleSetModeCmd, bt::SET_MODE)
 	, mSetMotorEnableCmdHandler(this, &HermesController::handleSetMotorEnCmd, bt::SET_MOTOR_EN)
 	, mSetPIDK1CmdHandler(this, &HermesController::handleSetPIDK1Cmd, bt::SET_PID_K1)
-	, mButtonPressPinWatcher(this, &HermesController::onButtonPress, B1_PIN)
-	, mCheckStateTimer(this, &HermesController::onTimerExpire)
-	, mNeutralLoadTimer(this, &HermesController::onNeutralLoadTimerExpire)
-	, mChargeRdyMsgHandler(this, &HermesController::handleChargeRdyMsg, CHARGE_RDY_MSG)
 	, mBluetoothStatusMsg(this, &HermesController::handleBluetoothStatusMsg, BLUETOOTH_STATUS_MSG)
 {
 	return;
@@ -42,9 +35,6 @@ bool HermesController::init(void)
 	configureGpios();
 	DevLog::init();
 
-	status &= mBluetoothInterface.registerSerialHandler(&mGetInfoCmdHandler);
-	status &= mBluetoothInterface.registerSerialHandler(&mGetFaultCmdHandler);
-	status &= mBluetoothInterface.registerSerialHandler(&mGetBatteryCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mGetIdCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetThrottleCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMaxAccelCmdHandler);
@@ -52,11 +42,7 @@ bool HermesController::init(void)
 	status &= mBluetoothInterface.registerSerialHandler(&mSetModeCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetMotorEnableCmdHandler);
 	status &= mBluetoothInterface.registerSerialHandler(&mSetPIDK1CmdHandler);
-	//status &= registerObserver(&mButtonPressPinWatcher);
-	registerMessageHandler(&mChargeRdyMsgHandler);
 	registerMessageHandler(&mBluetoothStatusMsg);
-	registerTimer(&mCheckStateTimer);
-	registerTimer(&mNeutralLoadTimer);
 
 	//mButtonPressPinWatcher.enable();
 
@@ -80,26 +66,6 @@ void HermesController::onCriticalFault(const core::CriticalFault& criticalFault)
 	return;
 }
 
-void HermesController::enterSleep(void)
-{
-	messages::SleepStateMsg msg(true);
-	BaseApp::sendMessage(&msg);
-
-	// Put core in sleep state
-	// set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	return;
-}
-
-void HermesController::pullbackFromSleep(void)
-{
-	// Take core out of sleep state
-	// todo: 
-
-	messages::SleepStateMsg msg(false);
-	BaseApp::sendMessage(&msg);
-	return;
-}
-
 void HermesController::changeState(State_t state)
 {
 	if (state == mState) return;
@@ -111,11 +77,6 @@ void HermesController::changeState(State_t state)
 		break;
 
 	case FAULT:
-		mMotorController.disableMotor();
-		mMotorController.motorOff();
-		digitalWrite(MOT_EN_LED, LOW);
-		digitalWrite(CHG_LED, LOW);
-		mChargerInterface.stopCharging();
 		break;
 
 	case MOTOR_DISABLED:
@@ -137,14 +98,9 @@ void HermesController::changeState(State_t state)
 		mMotorController.motorOn();
 		digitalWrite(MOT_EN_LED, HIGH);
 		digitalWrite(CHG_LED, HIGH);
-		mChargerInterface.stopCharging();
 		break;
 
 	case SLEEP:
-		mMotorController.disableMotor();
-		digitalWrite(MOT_EN_LED, LOW);
-		digitalWrite(CHG_LED, LOW);
-		enterSleep();
 		break;
 
 	case CHARGING:
@@ -157,11 +113,6 @@ void HermesController::changeState(State_t state)
 	default:
 		// DLOG_ERROR("Trying to change into unknown state.");
 		break;
-	}
-
-	// detect pullback from sleep
-	if (mState == SLEEP) {
-		pullbackFromSleep();
 	}
 
 	mState = state;
@@ -185,87 +136,6 @@ void HermesController::configureGpios(void)
 	pinMode(Pin_t::MOTOR_SENSE_H3, INPUT);
 	pinMode(Pin_t::MOTOR_SENSE_TPM, INPUT);
 	pinMode(Pin_t::MOT_EN, OUTPUT);
-}
-
-bt::BluetoothResponse* HermesController::handleGetInfoCmd(const bt::GetInfoCmd* cmd)
-{
-	bt::GetInfoResp* resp = nullptr;
-	if (cmd != nullptr && cmd->valid()) {
-		resp = new bt::GetInfoResp(true);
-		
-		bt::SysStatus_t sysStatus;
-		bt::BatteryStatus_t batteryStatus = mBatteryInterface.getBatteryStatus();
-		bt::ChargeStatus_t chargerStatus = mChargerInterface.getChargerStatus();
-		sysStatus.bit.FAULT_FLAG = batteryStatus.bit.IC_FAULT
-			| batteryStatus.bit.OVERCURRENT
-			| batteryStatus.bit.OVERVOLTAGE
-			| batteryStatus.bit.SHORTCIRCUIT
-			| batteryStatus.bit.UNDERVOLTAGE;
-		sysStatus.bit.BATTERY_STATE = mBatteryInterface.getState();
-		sysStatus.bit.RUN_STATE = mState;
-		resp->setSysStatus(sysStatus);
-
-		bt::ConfigInfo_t config;
-		config.bit.control = mControl;
-		config.bit.maxAccel = mMotorController.getMaxAccel();
-		config.bit.maxSpeed = mMotorController.getMaxSpeed();
-		resp->setConfigInfo(config);
-
-	} else {
-		resp = new bt::GetInfoResp(false);
-	}
-
-	return resp;
-}
-
-bt::BluetoothResponse* HermesController::handleGetFaultCmd(const bt::GetFaultCmd* cmd)
-{
-	bt::GetFaultResp* resp = nullptr;
-	if (cmd != nullptr && cmd->valid()) {
-
-		bt::FaultData_t fault;
-		bt::BatteryStatus_t batFault = mBatteryInterface.getBatteryStatus();
-		bt::ChargeStatus_t chargeFault = mChargerInterface.getChargerStatus();
-
-		resp = new bt::GetFaultResp(true);
-		fault.bit.BATTERY_DISCONNECT;
-		//fault.bit.BAT_CRITICAL = 
-		//fault.bit.BAT_WARNING =
-		//fault.bit.CHARGE_ERR =
-		//fault.bit.CRITICAL_FAULT =
-		//fault.bit.IMU_ERR =
-		//fault.bit.MOTOR_ERR =
-		//fault.bit.SOFTWARE_ERR =
-		resp->SetFaultStatus(fault);
-	}
-	else {
-		resp = new bt::GetFaultResp(false);
-	}
-
-	return resp;
-}
-
-bt::BluetoothResponse* HermesController::handleGetBatteryCmd(const bt::GetBatteryCmd* cmd)
-{
-	bt::GetBatteryResp* resp = nullptr;
-	if (cmd != nullptr && cmd->valid()) {
-
-		bt::BatteryStatus_t status = mBatteryInterface.getBatteryStatus();
-		uint16_t cell1 = mBatteryInterface.getCell1Voltage();
-		uint16_t cell2 = mBatteryInterface.getCell2Voltage();
-		uint16_t cell3 = mBatteryInterface.getCell3Voltage();
-		uint16_t temp = mBatteryInterface.getTemp();
-
-		resp = new bt::GetBatteryResp(true);
-		resp->setBatteryStatus(status);
-		resp->setCellVoltage(cell1, cell2, cell3);
-		resp->setTemp(temp);
-
-	} else {
-		resp = new bt::GetBatteryResp(false);
-	}
-
-	return resp;
 }
 
 bt::BluetoothResponse* HermesController::handleGetIdCmd(const bt::GetIdCmd* cmd)
@@ -336,14 +206,7 @@ bt::BluetoothResponse* HermesController::handleSetModeCmd(const bt::SetModeCmd* 
 {
 	bt::SetModeResp* resp = nullptr;
 	if (cmd != nullptr && cmd->valid()) {
-		
 		mControl = cmd->getControlMode();
-		if (mControl == LOAD_SENSOR && !mCheckStateTimer.isEnabled()) {
-			mCheckStateTimer.start(250, PERIODIC);
-		} else if (mControl != LOAD_SENSOR) {
-			mCheckStateTimer.stop();
-		}
-
 		resp = new bt::SetModeResp(true);
 	}
 	else {
@@ -389,91 +252,12 @@ bt::BluetoothResponse* HermesController::handleSetPIDK1Cmd(const bt::SetPIDK1Cmd
 	return resp;
 }
 
-void HermesController::handleChargeRdyMsg(const messages::ChargeRdyMsg* msg)
-{
-	if (msg->isReadyToCharge()) {
-		changeState(CHARGING);
-		mChargerInterface.setChargeSpeed(ChargeSpeed_t::CURRENT_5A);
-		mChargerInterface.startCharging();
-	} else {
-		changeState(MOTOR_DISABLED);
-		mChargerInterface.stopCharging();
-	}
-}
-
 void HermesController::handleBluetoothStatusMsg(const messages::BluetoothStatusMsg* msg)
 {
 	// Bluetooth is disconnected, shut off motor.
 	if (!msg->isConnected()) {
 		changeState(MOTOR_DISABLED);
 	}
-}
-
-void HermesController::onButtonPress(Pin_t pin, int16_t state)
-{
-	// DLOG_INFO("Button state=%s", state == LOW ? "DOWN" : "UP");
-	//if (state == LOW) {
-	//	if (mState == MOTOR_OFF) {
-	//		changeState(MOTOR_DISABLED);
-	//	} else if (mState == MOTOR_DISABLED) {
-	//		changeState(MOTOR_OFF);
-	//	}
-	//}
-
-	//if (state == LOW) {
-	//	mTestState++;
-	//	if (mTestState >= 6) {
-	//		mTestState = 0;
-	//	}
-
-	//	switch (mTestState) {
-	//	case 0:
-	//		changeState(MOTOR_DISABLED);
-	//		break;
-
-	//	case 1:
-	//		changeState(MOTOR_OFF);
-	//		break;
-
-	//	case 2:
-	//		changeState(READY);
-	//		break;
-
-	//	case 3:
-	//		mMotorController.setThrottleInput(175);
-	//		break;
-
-	//	case 4:
-	//		mMotorController.setThrottleInput(255);
-	//		break;
-
-	//	case 5:
-	//		mMotorController.setThrottleInput(0);
-	//		break;
-	//	}
-	//}
-}
-
-void HermesController::onTimerExpire(uint32_t userdata)
-{
-	hw::LoadSensor::LeanState_t leanState = mLoadSensor.getLeanState();
-
-	if (mControl == LOAD_SENSOR) {
-		if (leanState == hw::LoadSensor::FORWARD) {
-			mMotorController.setThrottleInput(25);
-			mNeutralLoadTimer.stop();
-		} else if (leanState == hw::LoadSensor::BACKWARD) {
-			mMotorController.setThrottleInput(0);
-			mNeutralLoadTimer.stop();
-		} else if (leanState == hw::LoadSensor::NEUTRAL) {
-			mNeutralLoadTimer.start(1000, ONESHOT);
-		}
-	}
-}
-
-void HermesController::onNeutralLoadTimerExpire(uint32_t userdata)
-{
-	mMotorController.setThrottleInput(0);
 }
 
 }

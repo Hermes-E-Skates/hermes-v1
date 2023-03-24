@@ -7,7 +7,6 @@
 
 
 #include "../../include/hw/MotorInterface.h"
-#include "../../include/hw/LoadSensor.h"
 #include "../../include/cmds/SetPIDK1.h"
 
 
