@@ -165,6 +165,11 @@ void MotorInterface::setPIDK1(uint8_t k1)
 	return;
 }
 
+void MotorInterface::setPwmForce(bool force)
+{
+	mPwmForce = force;
+}
+
 MaxSpeed_t MotorInterface::getMaxSpeed(void) const
 {
 	return mMaxSpeed;

@@ -228,6 +228,8 @@ bt::BluetoothResponse* HermesController::handleSetMotorEnCmd(const bt::SetMotorE
 		} else {
 			changeState(MOTOR_DISABLED);
 		}
+
+		mMotorController.setPwmForce(cmd->isPwmForce());
 		resp = new bt::SetMotorEnableResp(true);
 	}
 	else {

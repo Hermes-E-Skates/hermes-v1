@@ -28,6 +28,7 @@ public:
 	void setMaxSpeed(MaxSpeed_t maxSpeed);
 	void setMaxAccel(MaxAccel_t maxAccel);
 	void setPIDK1(uint8_t k1);
+	void setPwmForce(bool force);
 	MaxSpeed_t getMaxSpeed(void) const;
 	MaxAccel_t getMaxAccel(void) const;
 	void motorOn(void);
@@ -48,6 +49,7 @@ private:
 	uint32_t mLastTimeUpdated = 0;
 	uint32_t mLastTimer = 0;
 	int8_t mHallCounter = 0;
+	bool mPwmForce = false;
 	
 	float mHallSpeedBuffer[35];
 	float mHallSpeed = 0.0f;

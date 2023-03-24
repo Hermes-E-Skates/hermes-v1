@@ -24,11 +24,13 @@ public:
     SetMotorEnableCmd(void);
     bool isMotorEnabled(void) const;
     bool isMotorOn(void) const;
+    bool isPwmForce(void) const;
 
 private:
     virtual bool decode(const uint8_t* const bytes, uint8_t len) override;
     bool mMotorEnable;
     bool mMotorOn;
+    bool mPwmForce;
 };
 
 class SetMotorEnableResp : public BluetoothResponse

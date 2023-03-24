@@ -28,6 +28,11 @@ bool SetMotorEnableCmd::isMotorOn(void) const
 	return mMotorOn;
 }
 
+bool SetMotorEnableCmd::isPwmForce(void) const
+{
+	return mPwmForce;
+}
+
 bool SetMotorEnableCmd::decode(const uint8_t* const bytes, uint8_t len)
 {
 	// 00 = MOTOR DISABLE, MOTOR OFF
@@ -35,18 +40,11 @@ bool SetMotorEnableCmd::decode(const uint8_t* const bytes, uint8_t len)
 	// 11 = MOTOR ENABLE, MOTOR ON
 	// 10 = INVALID STATE
 
-	Serial.write(99);
 	if (len == 1) {
-		if ((*bytes) == 1) {
-			mMotorEnable = true;
-			mMotorOn = false;
-		} else if ((*bytes) == 3) {
-			mMotorEnable == true;
-			mMotorOn == true;
-		} else {
-			mMotorEnable = false;
-			mMotorOn = false;
-		}
+		mMotorEnable = (*bytes)&0b00000001;
+		mMotorOn     = (*bytes)&0b00000010;
+		mPwmForce    = (*bytes)&0b00000100;
+
 		return true;
 	} else {
 		return false;
